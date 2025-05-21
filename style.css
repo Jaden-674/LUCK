@@ -130,6 +130,7 @@ body {
   border-radius: 10px;
   color: black;
   font-size: 35px;
+  cursor: pointer;
 }
 
 #lobby_overlay_html input[type=button]:hover {
@@ -195,7 +196,11 @@ input::placeholder {
   border-bottom: 1px solid black; 
   padding-top: 1vh;
   padding-bottom: 1vh;
+}
 
+.leaderBoard_Lobbydisplay h1:hover{
+background-color: lightblue;
+cursor: pointer;
 }
 
 .leaderBoard_Lobbydisplay h2{
@@ -207,7 +212,7 @@ input::placeholder {
 }
 
 #leaderboard_localBG {
-  background-color: rgb(98, 125, 127);
+  background-color: rgb(97, 115, 197);
 }
 
 #goldtext_LeaderBoard {
@@ -249,10 +254,12 @@ input::placeholder {
   transform: translate(72.5vw, -100vh);
   background-color: aliceblue;
   opacity: 45%;
+  
 }
 #rightSet_match_button:hover {
   background-color: lightblue;
   opacity: 80%;
+  cursor: pointer;
 }
 
 #leftSet_match_button {
@@ -266,6 +273,7 @@ input::placeholder {
 #leftSet_match_button:hover {
   background-color: lightblue;
   opacity: 80%;
+  cursor: pointer;
 }
 
 #midSet_match_button {
@@ -279,6 +287,7 @@ input::placeholder {
 #midSet_match_button:hover {
   background-color: lightblue;
   opacity: 80%;
+  cursor: pointer;
 }
 
 #rightSet_CloseDelay {

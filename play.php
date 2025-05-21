@@ -176,10 +176,10 @@ if (isset($_GET["newServerLink"]) && $_GET["newServerLink"] == "clean") {
   }
 }
 
-if (isset($_GET["rotate_Leaderboard"])){
-  if (!isset($_SESSION["rotate_Leaderboard"])) {
+if (!isset($_SESSION["rotate_Leaderboard"])) {
   $_SESSION["rotate_Leaderboard"] = 1; 
   }
+if (isset($_GET["rotate_Leaderboard"])){
   if ($_SESSION["rotate_Leaderboard"] >= 3) {
     $_SESSION["rotate_Leaderboard"] = 1;
   }
@@ -1042,7 +1042,6 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
   echo "<input id=\"join_code_input\" type=\"number\" placeholder=\"Enter Game Code\" onkeydown=\"if (event.keyCode == 13) { joinCode_entered(); return false }\" onkeypress=\"return event.charCode >= 48 && event.charCode <= 57\" min=\"0\" \"> </input>";
 
   echo "<div class=\"user_scoreCard_Lobbydisplay\">";
-  echo "<input type=\"button\" onclick=\"return rotate_Leaderboard()\">";
     $User_LobbyScore = R::load("save".$_SESSION["id"], 1);
     echo "<h1>".$_SESSION["username"]."'s Stats:</h1>";
     echo "<h2>Matches Played: ".$User_LobbyScore->save2."</h2>";
@@ -1051,6 +1050,7 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
     echo "<h2>Win Streak: ".$User_LobbyScore->save4."</h2>";
     echo "<h2>Max Streak: "; if (intval($User_LobbyScore->save5) > 0) { echo $User_LobbyScore->save5; } else { echo "No Data"; } if (!isset($User_LobbyScore->save5)) { echo "Error:OOD-stat";} echo "</h2>";
     echo "</div>";
+
 
   echo "<div class=\"leaderBoard_Lobbydisplay\" >";
   $leaderboard_Aplicants = R::findAll("user");
@@ -1068,7 +1068,11 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
   }
   $leaderB_globalArray = array_combine($leaderB_usersArray, $leaderB_statArray);
   arsort($leaderB_globalArray);
-  echo "<h1>Wins Leader Board</h1>";
+  echo "<h1 onclick=\"return rotate_Leaderboard()\">";
+  if ($_SESSION["rotate_Leaderboard"] == 1) { echo "Wins "; }; 
+  if ($_SESSION["rotate_Leaderboard"] == 2) { echo "Win% "; }; 
+  if ($_SESSION["rotate_Leaderboard"] == 3) { echo "Max Streak<br>"; }; 
+  echo "Leader Board</h1>";
   for ($lb_display_counter = 0; $lb_display_counter<count($leaderB_globalArray); $lb_display_counter++) {
     if (isset(array_values($leaderB_globalArray)[$lb_display_counter])) {
       echo "<h2";
@@ -1084,13 +1088,12 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
       echo " <span style=\"color:rgb(255, 183, 0)\">(".array_values($leaderB_globalArray)[$lb_display_counter];
       if ($_SESSION["rotate_Leaderboard"] == 1) { echo "👑"; }; 
       if ($_SESSION["rotate_Leaderboard"] == 2) { echo "%"; }; 
-      if ($_SESSION["rotate_Leaderboard"] == 2) { echo "%"; }; 
+      if ($_SESSION["rotate_Leaderboard"] == 3) { echo "🔥"; }; 
       echo ")</span></h2>";
     }
   }
   echo "</div>";
-    // if (array_keys($leaderB_globalArray)[$lb_display_counter] == $_SESSION["username"]) { echo "<span style=\"color:PowderBlue\"> - ME </span>"; }
-  // echo " style=\"color:goldenrod\"";
+
   echo "</div>";
   }
   //errorbanners
