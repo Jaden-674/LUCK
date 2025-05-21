@@ -1,0 +1,21 @@
+html {
+    overscroll-behavior: none;
+}
+
+#banned_red {
+    color: red;
+}
+#admin_blue {
+    color: rgb(0, 142, 167);
+}
+
+#bottom {
+    width:150px;
+    height: 25px;
+    position: fixed;
+    background-color: grey;
+    text-align: center;
+    padding-top: 7.5px;
+    margin-top: 93vh;
+}
+

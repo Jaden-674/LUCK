@@ -1,0 +1,315 @@
+body {
+  margin-top: 0px;
+  margin-right: 0px;
+  margin-bottom: 0px;
+  margin-left: 0px;
+  overscroll-behavior: none;
+  overflow-x: none;
+  background-color: #defdff;
+  /* background-color: light-dark(#defdff, black);  */
+}
+
+html,
+body {
+  /* background-image:  url("true.jpeg"); */
+  overscroll-behavior: none;
+}
+
+.inputbar_fixed {
+  padding-top: -8px;
+  height: 10vh;
+  width: 71.5vw;
+  margin-left: 28.5vw;
+  /* transform: translate(-16px, 0px); */
+  /* transform: translateY(90vh); */
+  transform: translate3d(0px, 90vh, 10px);
+  background-color: white;
+  position: fixed;
+  z-index: 1;
+  border: 0px;
+  border-top: 3px;
+  border-style: solid;
+  border-color: grey;
+}
+.read_left {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  /* width: 40vw; */
+  margin-left: 30vw;
+  max-width: 40vw;
+  white-space: normal;
+  z-index: 0;
+  position: relative;
+  padding-bottom: 10vh;
+  /* background-image:  url("images.png"); */
+}
+
+#sendMessage {
+  border-color: rgb(0, 143, 200);
+  /* margin-top: 18px;
+      margin-bottom: 20px; */
+}
+#receivedmessage {
+  border-color: rgb(57, 255, 116);
+  margin-top: 18px;
+  margin-bottom: 20px;
+}
+#receivedmessage_global {
+  border-color: #727a7c;
+  /* margin-top: -18px;
+        margin-bottom: -20px; */
+}
+
+#zeroPX {
+  font-size: 0px;
+}
+
+.textbubble {
+  border: 2px solid lime;
+  border-radius: 5px;
+  word-wrap: break-word;
+  height: auto;
+  padding: 8px;
+  display: inline-block;
+  max-width: 50vw;
+  background-color: white;
+}
+
+#moveleft_nametag {
+  margin-bottom: -17px;
+  margin-left: 8px;
+  margin-right: 4px;
+  max-width: 50vw;
+  /* transform: translate(0px, 10px); */
+}
+
+#textinput {
+  width: 35vw;
+}
+
+#center_inputfield {
+  display: block;
+  margin: auto;
+  margin-left: 22.5%;
+  margin-top: 20px;
+}
+
+.input_newtransfer {
+  transform: translate(0px, -30px);
+}
+
+#timeColour {
+  color: magenta;
+  font-size: 10px;
+}
+
+img {
+  max-width: 100%;
+}
+
+iframe {
+  min-width: 1000px;
+}
+
+.chatview_display {
+  color: rgb(50, 50, 50);
+  width: 20vw;
+  height: 50px;
+  margin-left: 80vw;
+  background-color: rgb(237, 237, 237);
+  margin-bottom: -50px;
+  padding-left: 20px;
+  border-color: grey;
+  border-radius: 15px;
+  transform: translate(0px, 15px);
+}
+
+.sidebar_fixed {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  height: 100vh;
+  width: 28.3vw;
+  background-color: white;
+  position: fixed;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  border: 0px;
+  border-right: 3px;
+  border-style: solid;
+  border-color: grey;
+  z-index: 1;
+}
+
+.sidebar_fixed::-webkit-scrollbar {
+  display: none;
+}
+
+.myDiv {
+  background-color: rgb(255, 255, 255);
+
+  text-align: left;
+  font-size: 16.4px;
+  width: 94.5%;
+  padding: 31.625px;
+  padding-right: 0px;
+  padding-left: 23px;
+  max-height: 40px;
+  margin-bottom: -20px;
+}
+.myDiv_selected {
+  background-color: rgb(239, 255, 239);
+  text-align: left;
+  font-size: 16.4px;
+  width: 94.5%;
+  height: 40px;
+  padding: 31.625px;
+  padding-right: 0px;
+  padding-left: 23px;
+  max-height: 40px;
+  margin-bottom: -20px;
+  overflow: hidden;
+}
+
+.myDiv_newMessage {
+  background-color: rgb(255, 255, 255);
+  text-align: left;
+  font-size: 16.4px;
+  width: 94.5%;
+  padding: 31.625px;
+  padding-right: 0px;
+  padding-left: 23px;
+  max-height: 40px;
+  margin-bottom: -20px;
+}
+
+.SearchMatched_True {
+  background-color: rgb(255, 255, 255);
+  text-align: left;
+  font-size: 16.4px;
+  width: 94.5%;
+  padding: 31.625px;
+  padding-right: 0px;
+  padding-left: 23px;
+  padding-top: 20px;
+  padding-bottom: 2px;
+  max-height: 40px;
+  /* margin-bottom: 10px; */
+}
+.SearchMatched_True:hover {
+  background-color: rgba(218, 218, 218, 0.5);
+}
+
+#test12 {
+  /* margin-top: -20px; */
+  padding-bottom: -40px;
+  font-size: 14px;
+  width: 42ch;
+  height: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#button_list {
+  width: 121.9%;
+  max-height: 84.2px;
+  height: 84.2px;
+  margin-left: -8%;
+  margin-top: -51.625px;
+  padding-top: -14.375px;
+  background-color: rgba(255, 0, 0, 0);
+  border-width: 0px;
+  font-size: 0px;
+}
+
+#button_list:hover {
+  background-color: rgba(218, 218, 218, 0.5);
+}
+
+#button_list_notifcation {
+  width: 121.9%;
+  max-height: 84.2px;
+  height: 84.2px;
+  margin-left: -8%;
+  margin-top: -70px;
+  padding-top: -14.375px;
+  background-color: rgba(255, 0, 0, 0);
+  border-width: 0px;
+  font-size: 0px;
+}
+
+#circle_move {
+  transform: translate(40px, -47.5px);
+  pointer-events: none;
+}
+
+#notification_move {
+  color: red;
+  /* transform: translate(142.5px,-82.5px); */
+  transform: translate(19.5ch, -82.5px);
+  pointer-events: none;
+}
+
+#button_list_notifcation_translate {
+  width: 121.9%;
+  max-height: 84.2px;
+  height: 84.2px;
+  margin-left: -8%;
+  margin-top: -133px;
+  padding-top: -14.375px;
+  background-color: rgba(255, 255, 255, 0);
+  border-width: 0px;
+  font-size: 0px;
+}
+
+#button_list_notifcation:hover {
+  background-color: rgba(218, 218, 218, 0.5);
+}
+
+#button_list_notifcation_translate:hover {
+  background-color: rgba(218, 218, 218, 0.5);
+}
+
+.settings_button {
+  /* padding: vh; */
+  /* background-color: rgb(245, 245, 245); */
+  transform: translate(100vw, 15px);
+  margin-left: -75px;
+  margin-bottom: -70px;
+  border-radius: 100%;
+  /* margin-top: -60px; */
+  /* transform: translate(-50px, 0px); */
+  border-collapse: collapse;
+  width: 60px;
+  height: 60px;
+  position: fixed;
+}
+
+#circlewhite {
+  margin-top: -60px;
+}
+
+#custom_border_colour {
+  /* border-top: 1px outset rgb(255, 0, 255); */
+
+  border-width: 2px;
+  border-style: solid;
+  border-bottom: none;
+  border-right: none;
+  border-left: none;
+  /* border-top:; */
+  /* background-color: white; */
+  /* border-color:#ffabf5; */
+}
+
+#redbackground {
+  background-color: #ffabf5;
+}
+
+#add_user {
+  transform: translate(19vw, -18px);
+}
+
+.SearchMatched_True a {
+  margin-left: 0.05vw;
+  font-size: 10;
+}

@@ -1,0 +1,27 @@
+:start php:
+
+if fetch is true {
+  - get game code and load data for game  
+  - convert to json 
+  - package json fetch request
+}
+:end php: 
+
+:javascript start:
+
+ - create function with interval - fetch_data()
+
+function fetch_data() {
+ - get request json package
+ - create varibles from response xw
+ - update page with new data
+ }
+
+:javascript end:
+
+
+
+
+
+
+

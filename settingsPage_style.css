@@ -1,0 +1,34 @@
+body { 
+    margin-top: 0px;
+    margin-right: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    overscroll-behavior: none; 
+    overflow-x: none;
+    background-color: #111117;
+    overscroll-behavior: none;
+}
+
+a {
+  color:rgb(254, 255, 244); 
+}
+
+.text {
+  color: rgb(43, 147, 43);
+}
+
+.settings_button {
+    overscroll-behavior: none;
+    transform: translate(80vw, 0px);
+    position: fixed;
+    background-color: red;
+    position: initial;
+    /* height: 80px; */
+    width: 20vw;
+}
+
+#list {
+  /* position: fixed; */
+  margin-top: -90px;
+    color: rgb(43, 147, 43);
+}
