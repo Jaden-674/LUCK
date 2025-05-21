@@ -93,6 +93,121 @@ if (isset($_GET["FindingPlayer_data"])) {
   echo json_encode($Find_player_response);
   exit;
 }
+// localhost/LUCK/play.php?GridUpdate=win&&ClickBase=153&&Check1=139&&Check2=125&&Check3=111&&Check4=97&&TurnColour=blue
+// localhost/LUCK/play.php?Locked=***&&GridUpdate=red
+if (isset($_GET["GridUpdate"]) && $viewingCode != 0) {
+  if ($_GET["GridUpdate"] == "win") {
+    $winUpdate = R::load("save", $viewingCode);
+        if (isset($_SESSION["id"]) && (($_SESSION["id"] == json_decode($winUpdate->uID_1)[0] && isset(json_decode($winUpdate->uID_1)[0])) || ($_SESSION["id"] == json_decode($winUpdate->uID_2)[0] && isset(json_decode($winUpdate->uID_1)[0])))) {
+        $newOpenArray = json_decode($winUpdate->d1, true);
+        $red_used_Array = json_decode($winUpdate->d2, true) ?: []; 
+        $blue_used_Array = json_decode($winUpdate->d3, true) ?: [];
+        $currentColourWinCheck = $winUpdate->turn_open;
+        $checkGroup_array = [];
+        if (isset($_GET["Check1"]) && isset($_GET["Check2"]) && isset($_GET["Check3"]) && isset($_GET["Check4"]) && isset($_GET["ClickBase"]) && isset($_GET["TurnColour"]) && $currentColourWinCheck == $_GET["TurnColour"]) {
+        array_push($checkGroup_array, intval($_GET["Check1"]), intval($_GET["Check2"]), intval($_GET["Check3"]), intval($_GET["Check4"]), intval($_GET["ClickBase"]));
+        sort($checkGroup_array);
+        $commonDiff_array = [];
+        for ($common_diff_counter = 0; $common_diff_counter <= 3; $common_diff_counter++) {
+          if ($_GET["TurnColour"] == "red" && in_array($checkGroup_array[$common_diff_counter], $red_used_Array)) { array_push($commonDiff_array, ($checkGroup_array[$common_diff_counter+1]-$checkGroup_array[$common_diff_counter])); }
+          if ($_GET["TurnColour"] == "blue" && in_array($checkGroup_array[$common_diff_counter], $blue_used_Array)) { array_push($commonDiff_array, ($checkGroup_array[$common_diff_counter+1]-$checkGroup_array[$common_diff_counter])); }
+        }
+        if (count(array_unique($commonDiff_array)) == 1) {
+          if($_GET["TurnColour"] == "red") {
+            array_push($red_used_Array, intval($_GET["ClickBase"]));
+            $winUpdate->d2 = json_encode($red_used_Array);
+          }
+          if($_GET["TurnColour"] == "blue") {
+            array_push($blue_used_Array, intval($_GET["ClickBase"])); 
+            $winUpdate->d3 = json_encode($blue_used_Array);
+          }
+          $winUpdate->winner_uid = json_encode([$_SESSION["id"], json_encode($checkGroup_array), rand(0,100), time()+6]);
+          $winUpdate->turn_id[0] = "[-1";
+          $winUpdate->total_moves = intval($winUpdate->total_moves)+1; 
+          if (json_decode($winUpdate->uID_1)[0] != json_decode($winUpdate->uID_2)[0] && json_decode($winUpdate->uID_2)[0] != null) {
+            if (intval($_SESSION["id"]) == intval(json_decode($winUpdate->uID_1)[0])) { $userLoad_UID_Lost = R::load(("save".strval(json_decode($winUpdate->uID_2)[0])), 1); }
+            else { $userLoad_UID_Lost = R::load(("save".strval(json_decode($winUpdate->uID_1)[0])), 1); }
+            $userLoad_UID_Lost->save4 = 0;
+            R::store($userLoad_UID_Lost);
+            $userLoad_UID_winner = R::load("save".$_SESSION["id"], 1);
+            $userLoad_UID_winner->save3++;
+            $userLoad_UID_winner->save4++;
+            if (intval($userLoad_UID_winner->save4) > intval($userLoad_UID_winner->save5)) {
+            $userLoad_UID_winner->save5 = $userLoad_UID_winner->save4;
+            }
+            R::store($userLoad_UID_winner);
+          }
+          }
+        }
+      }
+    R::store($winUpdate);
+  }
+  if ($_GET["GridUpdate"] == "red" || $_GET["GridUpdate"] == "blue") {
+    $saveUpdate = R::load("save", $viewingCode);
+      if (isset($_SESSION["id"]) && $_SESSION["id"] == json_decode($saveUpdate->turn_id)[0] && (($_SESSION["id"] == json_decode($saveUpdate->uID_1)[0] && isset(json_decode($saveUpdate->uID_1)[0])) || ($_SESSION["id"] == json_decode($saveUpdate->uID_2)[0] && isset(json_decode($saveUpdate->uID_1)[0])))) 
+        $red_used_Array = json_decode($saveUpdate->d2, true) ?: []; 
+        $blue_used_Array = json_decode($saveUpdate->d3, true) ?: [];
+        $newOpenArray = array_values(array_merge(json_decode($saveUpdate->d1, true), $red_used_Array, $blue_used_Array));
+        $grey_side_Array = json_decode($saveUpdate->d1_side, true);
+        if(in_array(intval($_GET["Locked"]), $newOpenArray) && $saveUpdate->turn_open == $_GET["GridUpdate"] && ((!in_array(intval($_GET["Locked"]), $red_used_Array) && !in_array(intval($_GET["Locked"]), $blue_used_Array)) || (count($red_used_Array) == 0 && count($blue_used_Array) == 0))) {
+        if ($_GET["GridUpdate"] == "red") {
+            array_push($red_used_Array, intval($_GET["Locked"]));
+        } 
+        else if ($_GET["GridUpdate"] == "blue") {
+            array_push($blue_used_Array, intval($_GET["Locked"]));
+        }
+        shuffle($grey_side_Array);
+        if (count($grey_side_Array) >= 2){
+        array_push($newOpenArray, intval($grey_side_Array[0]), intval($grey_side_Array[1]));
+        }
+        if ($saveUpdate->game_mode != 3 || $saveUpdate->game_mode != 5) {
+        for ($grey_find_count = 0; $grey_find_count < count($newOpenArray); $grey_find_count++ ) {
+          if (intval($newOpenArray[$grey_find_count]-1)%15 != 14 && intval($newOpenArray[$grey_find_count]-1) >= 0 && !in_array(intval($newOpenArray[$grey_find_count]-1),$newOpenArray) && !in_array(intval($newOpenArray[$grey_find_count]-1),$grey_side_Array)) { array_push($grey_side_Array, intval($newOpenArray[$grey_find_count]-1));}
+          if (intval($newOpenArray[$grey_find_count]+1)%15 != 0 && intval($newOpenArray[$grey_find_count]+1) <= 224 && !in_array(intval($newOpenArray[$grey_find_count]+1),$newOpenArray) && !in_array(intval($newOpenArray[$grey_find_count]+1),$grey_side_Array)) { array_push($grey_side_Array, intval($newOpenArray[$grey_find_count]+1));}
+          if (intval($newOpenArray[$grey_find_count]-15) >= 0 && !in_array(intval($newOpenArray[$grey_find_count]-15),$newOpenArray) && !in_array(intval($newOpenArray[$grey_find_count]-15),$grey_side_Array)) { array_push($grey_side_Array, intval($newOpenArray[$grey_find_count]-15));}
+          if (intval($newOpenArray[$grey_find_count]+15) <= 224 && !in_array(intval($newOpenArray[$grey_find_count]+15),$newOpenArray) && !in_array(intval($newOpenArray[$grey_find_count]+15),$grey_side_Array)) { array_push($grey_side_Array, intval($newOpenArray[$grey_find_count]+15));}
+        }
+        sort($grey_side_Array);
+      }
+      if ($saveUpdate->game_mode == 3) {
+        $grey_side_Array = [];
+        for($GM3_counter = 0; $GM3_counter<=224; $GM3_counter++) {
+          array_push($grey_side_Array, $GM3_counter);
+        }
+      }
+      if ($saveUpdate->game_mode == 5) {
+        $newOpenArray = [];
+        for($GM5_counter = 0; $GM5_counter<=224; $GM5_counter++) {
+          array_push($newOpenArray, $GM5_counter);
+        }
+      }
+        sort($newOpenArray);
+        $saveUpdate->d1 = json_encode(array_values(array_diff($newOpenArray, $red_used_Array, $blue_used_Array)));
+        $saveUpdate->d2 = json_encode($red_used_Array); 
+        $saveUpdate->d3 = json_encode($blue_used_Array);
+        $saveUpdate->total_moves = intval($saveUpdate->total_moves)+1; 
+        $saveUpdate->d1_side = json_encode(array_values(array_diff($grey_side_Array, $newOpenArray)));
+        $saveUpdate->turnOpen = ($_GET["GridUpdate"] == "red") ? "blue" : "red";
+        if ($saveUpdate->turn_id == $saveUpdate->uID_1) { $saveUpdate->turn_id = $saveUpdate->uID_2; }
+        else { $saveUpdate->turn_id = $saveUpdate->uID_1; }
+    }
+    R::store($saveUpdate);
+  }
+  if ($_GET["GridUpdate"] == "red" || $_GET["GridUpdate"] == "blue") {
+  $item = R::load("save", $viewingCode);
+  $GridUpdate_response = ["d1" => [], "d1_side" => [], "closedWinner_UID" => [], "currentColour" => [], "turn_id" => [], "T_M" => []];
+  $GridUpdate_response["d1"] = json_decode($item->d1);
+  $GridUpdate_response["d1_side"] = json_decode($item->d1_side);
+  $GridUpdate_response["currentColour"] = $item->turn_open;
+  $GridUpdate_response["turn_id"] = json_decode($item->turn_id);
+  $GridUpdate_response["closedWinner_UID"] = json_decode($item->winner_uid);
+  $GridUpdate_response["T_M"] = intval($item->total_moves);
+  echo json_encode($GridUpdate_response);
+  exit;
+  }
+  else { header("location: play.php"); }
+}
+
 
 //destroy match
 if (isset($_GET["match_destroy"]) && $_GET["match_destroy"] == "true") {
@@ -238,112 +353,6 @@ if (isset($_GET["reset"])){
       header("location: play.php");
 }
 
-// checking if clicked square can be placed in location and if it is a win or place square determied by client
-// url types:
-// localhost/LUCK/play.php?GridUpdate=win&&ClickBase=153&&Check1=139&&Check2=125&&Check3=111&&Check4=97&&TurnColour=blue
-// localhost/LUCK/play.php?Locked=***&&GridUpdate=red
-if (isset($_GET["GridUpdate"]) && $viewingCode != 0) {
-  if ($_GET["GridUpdate"] == "win") {
-    $winUpdate = R::load("save", $viewingCode);
-        if (isset($_SESSION["id"]) && (($_SESSION["id"] == json_decode($winUpdate->uID_1)[0] && isset(json_decode($winUpdate->uID_1)[0])) || ($_SESSION["id"] == json_decode($winUpdate->uID_2)[0] && isset(json_decode($winUpdate->uID_1)[0])))) {
-        $newOpenArray = json_decode($winUpdate->d1, true);
-        $red_used_Array = json_decode($winUpdate->d2, true) ?: []; 
-        $blue_used_Array = json_decode($winUpdate->d3, true) ?: [];
-        $currentColourWinCheck = $winUpdate->turn_open;
-        $checkGroup_array = [];
-        if (isset($_GET["Check1"]) && isset($_GET["Check2"]) && isset($_GET["Check3"]) && isset($_GET["Check4"]) && isset($_GET["ClickBase"]) && isset($_GET["TurnColour"]) && $currentColourWinCheck == $_GET["TurnColour"]) {
-        array_push($checkGroup_array, intval($_GET["Check1"]), intval($_GET["Check2"]), intval($_GET["Check3"]), intval($_GET["Check4"]), intval($_GET["ClickBase"]));
-        sort($checkGroup_array);
-        $commonDiff_array = [];
-        for ($common_diff_counter = 0; $common_diff_counter <= 3; $common_diff_counter++) {
-          if ($_GET["TurnColour"] == "red" && in_array($checkGroup_array[$common_diff_counter], $red_used_Array)) { array_push($commonDiff_array, ($checkGroup_array[$common_diff_counter+1]-$checkGroup_array[$common_diff_counter])); }
-          if ($_GET["TurnColour"] == "blue" && in_array($checkGroup_array[$common_diff_counter], $blue_used_Array)) { array_push($commonDiff_array, ($checkGroup_array[$common_diff_counter+1]-$checkGroup_array[$common_diff_counter])); }
-        }
-        if (count(array_unique($commonDiff_array)) == 1) {
-          if($_GET["TurnColour"] == "red") {
-            array_push($red_used_Array, intval($_GET["ClickBase"]));
-            $winUpdate->d2 = json_encode($red_used_Array);
-          }
-          if($_GET["TurnColour"] == "blue") {
-            array_push($blue_used_Array, intval($_GET["ClickBase"])); 
-            $winUpdate->d3 = json_encode($blue_used_Array);
-          }
-          $winUpdate->winner_uid = json_encode([$_SESSION["id"], json_encode($checkGroup_array), rand(0,100), time()+13]);
-          $winUpdate->turn_id[0] = "[-1";
-          $winUpdate->total_moves = intval($winUpdate->total_moves)+1; 
-          if (json_decode($winUpdate->uID_1)[0] != json_decode($winUpdate->uID_2)[0] && json_decode($winUpdate->uID_2)[0] != null) {
-            if (intval($_SESSION["id"]) == intval(json_decode($winUpdate->uID_1)[0])) { $userLoad_UID_Lost = R::load(("save".strval(json_decode($winUpdate->uID_2)[0])), 1); }
-            else { $userLoad_UID_Lost = R::load(("save".strval(json_decode($winUpdate->uID_1)[0])), 1); }
-            $userLoad_UID_Lost->save4 = 0;
-            R::store($userLoad_UID_Lost);
-            $userLoad_UID_winner = R::load("save".$_SESSION["id"], 1);
-            $userLoad_UID_winner->save3++;
-            $userLoad_UID_winner->save4++;
-            if (intval($userLoad_UID_winner->save4) > intval($userLoad_UID_winner->save5)) {
-            $userLoad_UID_winner->save5 = $userLoad_UID_winner->save4;
-            }
-            R::store($userLoad_UID_winner);
-          }
-          }
-        }
-      }
-    R::store($winUpdate);
-  }
-  if ($_GET["GridUpdate"] == "red" || $_GET["GridUpdate"] == "blue") {
-    $saveUpdate = R::load("save", $viewingCode);
-      if (isset($_SESSION["id"]) && $_SESSION["id"] == json_decode($saveUpdate->turn_id)[0] && (($_SESSION["id"] == json_decode($saveUpdate->uID_1)[0] && isset(json_decode($saveUpdate->uID_1)[0])) || ($_SESSION["id"] == json_decode($saveUpdate->uID_2)[0] && isset(json_decode($saveUpdate->uID_1)[0])))) 
-        $red_used_Array = json_decode($saveUpdate->d2, true) ?: []; 
-        $blue_used_Array = json_decode($saveUpdate->d3, true) ?: [];
-        $newOpenArray = array_values(array_merge(json_decode($saveUpdate->d1, true), $red_used_Array, $blue_used_Array));
-        $grey_side_Array = json_decode($saveUpdate->d1_side, true);
-        if(in_array(intval($_GET["Locked"]), $newOpenArray) && $saveUpdate->turn_open == $_GET["GridUpdate"] && ((!in_array(intval($_GET["Locked"]), $red_used_Array) && !in_array(intval($_GET["Locked"]), $blue_used_Array)) || (count($red_used_Array) == 0 && count($blue_used_Array) == 0))) {
-        if ($_GET["GridUpdate"] == "red") {
-            array_push($red_used_Array, intval($_GET["Locked"]));
-        } 
-        else if ($_GET["GridUpdate"] == "blue") {
-            array_push($blue_used_Array, intval($_GET["Locked"]));
-        }
-        shuffle($grey_side_Array);
-        if (count($grey_side_Array) >= 2){
-        array_push($newOpenArray, intval($grey_side_Array[0]), intval($grey_side_Array[1]));
-        }
-        if ($saveUpdate->game_mode != 3 || $saveUpdate->game_mode != 5) {
-        for ($grey_find_count = 0; $grey_find_count < count($newOpenArray); $grey_find_count++ ) {
-          if (intval($newOpenArray[$grey_find_count]-1)%15 != 14 && intval($newOpenArray[$grey_find_count]-1) >= 0 && !in_array(intval($newOpenArray[$grey_find_count]-1),$newOpenArray) && !in_array(intval($newOpenArray[$grey_find_count]-1),$grey_side_Array)) { array_push($grey_side_Array, intval($newOpenArray[$grey_find_count]-1));}
-          if (intval($newOpenArray[$grey_find_count]+1)%15 != 0 && intval($newOpenArray[$grey_find_count]+1) <= 224 && !in_array(intval($newOpenArray[$grey_find_count]+1),$newOpenArray) && !in_array(intval($newOpenArray[$grey_find_count]+1),$grey_side_Array)) { array_push($grey_side_Array, intval($newOpenArray[$grey_find_count]+1));}
-          if (intval($newOpenArray[$grey_find_count]-15) >= 0 && !in_array(intval($newOpenArray[$grey_find_count]-15),$newOpenArray) && !in_array(intval($newOpenArray[$grey_find_count]-15),$grey_side_Array)) { array_push($grey_side_Array, intval($newOpenArray[$grey_find_count]-15));}
-          if (intval($newOpenArray[$grey_find_count]+15) <= 224 && !in_array(intval($newOpenArray[$grey_find_count]+15),$newOpenArray) && !in_array(intval($newOpenArray[$grey_find_count]+15),$grey_side_Array)) { array_push($grey_side_Array, intval($newOpenArray[$grey_find_count]+15));}
-        }
-        sort($grey_side_Array);
-      }
-      if ($saveUpdate->game_mode == 3) {
-        $grey_side_Array = [];
-        for($GM3_counter = 0; $GM3_counter<=224; $GM3_counter++) {
-          array_push($grey_side_Array, $GM3_counter);
-        }
-      }
-      if ($saveUpdate->game_mode == 5) {
-        $newOpenArray = [];
-        for($GM5_counter = 0; $GM5_counter<=224; $GM5_counter++) {
-          array_push($newOpenArray, $GM5_counter);
-        }
-      }
-        sort($newOpenArray);
-        $saveUpdate->d1 = json_encode(array_values(array_diff($newOpenArray, $red_used_Array, $blue_used_Array)));
-        $saveUpdate->d2 = json_encode($red_used_Array); 
-        $saveUpdate->d3 = json_encode($blue_used_Array);
-        $saveUpdate->total_moves = intval($saveUpdate->total_moves)+1; 
-        $saveUpdate->d1_side = json_encode(array_values(array_diff($grey_side_Array, $newOpenArray)));
-        $saveUpdate->turnOpen = ($_GET["GridUpdate"] == "red") ? "blue" : "red";
-        if ($saveUpdate->turn_id == $saveUpdate->uID_1) { $saveUpdate->turn_id = $saveUpdate->uID_2; }
-        else { $saveUpdate->turn_id = $saveUpdate->uID_1; }
-    }
-    R::store($saveUpdate);
-  }
-  header("location: play.php");
-  exit;
-}
-
 // colour blind toggle
 if (isset($_GET["protanopiaToggle"])) {
     $userUpdatePROtoggle = R::load("save".$_SESSION["id"], 1);
@@ -406,7 +415,7 @@ if((isset($_GET["id"]) && $_GET["id"] == "loginCheck" )|| !isset($_SESSION["user
     $password = $_POST["password"];
     $user = R::findOne("user", "username = ?", [$username]);
     if($user == NULL){
-    header("Location: login.php?id=error=1");
+    header("Location: login.php?id=error1");
 }
 else if(!password_verify($password, $user->password)){
     header("Location: login.php?id=error2");
@@ -483,8 +492,6 @@ let client_totalMoves = -1;
 let local_UID = <?php echo intval($_SESSION["id"]);?>;
 let First_LargePacket_set = "false";
 
-// fetch json data from server
-
 function checkData() {
   if (player_UID_2_usrn == "ƒ") {
     fetch(window.location.href + '?FindingPlayer_data')
@@ -540,9 +547,9 @@ function checkData() {
         if (data.closedWinner_UID.length == 4) {
         set_winning_array = JSON.parse(data.closedWinner_UID[1]);
         win_timeframe = data.closedWinner_UID[3];
+        win_splash_random = parseInt(data.closedWinner_UID[2]);
         }
         else { set_winning_array = ["win_array_error"]; }
-        win_splash_random = parseInt(data.closedWinner_UID[2]);
         Set_GameMode = parseInt(data.game_presetVal);
         client_totalMoves = parseInt(data.total_movesSync)+1;
         for (let u = 0; u<225; u++) {
@@ -766,8 +773,24 @@ function checklocation(base) {
     for (let check_PositionPD_negative = 1; check_PositionPD_negative<5;) { if((base-(14*check_PositionPD_negative))%15 != 0 && base-(14*check_PositionPD_negative) >= 0 && grid[base].type == grid[base-(14*check_PositionPD_negative)].type) {check_linePD.push(base-(14*check_PositionPD_negative));check_PositionPD_negative++;} else{check_PositionPD_negative=16} }
     for (let check_PositionPD_positive = 1; check_PositionPD_positive<5;) { if((base+(14*check_PositionPD_positive))%15 != 14 && base+(14*check_PositionPD_positive) <= 224 && grid[base].type == grid[base+(14*check_PositionPD_positive)].type) {check_linePD.push(base+(14*check_PositionPD_positive));check_PositionPD_positive++;} else{check_PositionPD_positive=16} }
     if (check_linePD.length>=4) {location.href = "play.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_linePD[0]+"&&Check2="+check_linePD[1]+"&&Check3="+check_linePD[2]+"&&Check4="+check_linePD[3]+"&&TurnColour="+turn_colour_ghost; }
-    if (check_lineX.length<4 && check_lineY.length<4 && check_lineND.length<4 && check_linePD.length<4) {location.href = "play.php?Locked="+base+"&&GridUpdate="+turn_colour_ghost;}
+    if (check_lineX.length<4 && check_lineY.length<4 && check_lineND.length<4 && check_linePD.length<4) { 
+      fetch(window.location.href+"?Locked="+base+"&&GridUpdate="+turn_colour_ghost).then(clicked_response => clicked_response.json()).then(data => { 
+      colourRelay = data.currentColour; 
+      open_choices_Array = data.d1;
+      sides_display_Array = data.d1_side;
+      turn_id_current = parseInt(data.turn_id);
+      client_totalMoves = parseInt(data.T_M)+1;
+      if ( Set_GameMode != 2 ) {
+    for (let sides_counter = 0; sides_counter<sides_display_Array.length; sides_counter++) {
+    grid[sides_display_Array[sides_counter]].type = "side";
   }
+  }
+    for(let k2 = 0; k2<open_choices_Array.length; k2++) {
+    grid[open_choices_Array[k2]].type = "open";
+  }
+    });
+  }
+}
 }
 
 function draw() {
@@ -1071,8 +1094,8 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
   echo "<h1 onclick=\"return rotate_Leaderboard()\">";
   if ($_SESSION["rotate_Leaderboard"] == 1) { echo "Wins "; }; 
   if ($_SESSION["rotate_Leaderboard"] == 2) { echo "Win% "; }; 
-  if ($_SESSION["rotate_Leaderboard"] == 3) { echo "Max Streak<br>"; }; 
-  echo "Leader Board</h1>";
+  if ($_SESSION["rotate_Leaderboard"] == 3) { echo "<span>Max Streak</span> "; }; 
+  echo "<span>Leader Board</span></h1>";
   for ($lb_display_counter = 0; $lb_display_counter<count($leaderB_globalArray); $lb_display_counter++) {
     if (isset(array_values($leaderB_globalArray)[$lb_display_counter])) {
       echo "<h2";
