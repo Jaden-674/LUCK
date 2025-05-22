@@ -195,12 +195,11 @@ if (isset($_GET["GridUpdate"]) && $viewingCode != 0) {
   }
   if ($_GET["GridUpdate"] == "red" || $_GET["GridUpdate"] == "blue") {
   $item = R::load("save", $viewingCode);
-  $GridUpdate_response = ["d1" => [], "d1_side" => [], "closedWinner_UID" => [], "currentColour" => [], "turn_id" => [], "T_M" => []];
+  $GridUpdate_response = ["d1" => [], "d1_side" => [], "currentColour" => [], "turn_id" => [], "T_M" => []];
   $GridUpdate_response["d1"] = json_decode($item->d1);
   $GridUpdate_response["d1_side"] = json_decode($item->d1_side);
   $GridUpdate_response["currentColour"] = $item->turn_open;
   $GridUpdate_response["turn_id"] = json_decode($item->turn_id);
-  $GridUpdate_response["closedWinner_UID"] = json_decode($item->winner_uid);
   $GridUpdate_response["T_M"] = intval($item->total_moves);
   echo json_encode($GridUpdate_response);
   exit;
@@ -781,16 +780,16 @@ function checklocation(base) {
       turn_id_current = parseInt(data.turn_id);
       client_totalMoves = parseInt(data.T_M)+1;
       if ( Set_GameMode != 2 ) {
-    for (let sides_counter = 0; sides_counter<sides_display_Array.length; sides_counter++) {
-    grid[sides_display_Array[sides_counter]].type = "side";
+        for (let sides_counter = 0; sides_counter<sides_display_Array.length; sides_counter++) {
+          grid[sides_display_Array[sides_counter]].type = "side";
+        }
+      }
+        for(let k2 = 0; k2<open_choices_Array.length; k2++) {
+          grid[open_choices_Array[k2]].type = "open";
+        }
+      });
+    }
   }
-  }
-    for(let k2 = 0; k2<open_choices_Array.length; k2++) {
-    grid[open_choices_Array[k2]].type = "open";
-  }
-    });
-  }
-}
 }
 
 function draw() {
@@ -862,7 +861,7 @@ function draw() {
     pop()
   }
   if (Set_GameMode != 5) { text("Side Count:"+sides_display_Array.length+" ("+parseFloat((2/sides_display_Array.length*100).toFixed(2))+"%)", 0, 300); } else { text("Side Count: 0? (maybe%)" , 0, 300);}
-if (P5red_used_Array2[P5red_used_Array2.length-1]) {
+if (P5red_used_Array2[P5red_used_Array2.length-1] && Set_GameMode != 2) {
 if (colourBlind_mode == "off")
 text("Last Red:"+P5red_used_Array2[P5red_used_Array2.length-1], 0, 325)
 if (colourBlind_mode == "protanopia")
@@ -870,7 +869,7 @@ text("Last Yellow:"+P5red_used_Array2[P5red_used_Array2.length-1], 0, 325)
 let move_shift = 25;
 }
 else {let move_shift = 0;}
-if (P5blue_used_Array2[P5blue_used_Array2.length-1])
+if (P5blue_used_Array2[P5blue_used_Array2.length-1] && Set_GameMode != 2)
 text("Last Blue:"+P5blue_used_Array2[P5blue_used_Array2.length-1], 0, 350+move_shift)
 // text("Connect At: "+en0_redirect_display, -width/2.8, 30);
 pop()
@@ -1061,8 +1060,9 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
   if ($_SESSION["CurrentGID_Code"] == 0) {
     echo "<div id=\"titleSplash_text\"> LUCK </div>";
     echo "<div id=\"lobby_overlay_html\">";
-  echo "<input type=\"button\" value=\"Create Match\" onclick=\"return newMatch_Requested()\"></input>";  
-  echo "<input id=\"join_code_input\" type=\"number\" placeholder=\"Enter Game Code\" onkeydown=\"if (event.keyCode == 13) { joinCode_entered(); return false }\" onkeypress=\"return event.charCode >= 48 && event.charCode <= 57\" min=\"0\" \"> </input>";
+  echo "<input id=\"join_code_input\" type=\"number\" placeholder=\"Enter Game Code\" onkeydown=\"if (event.keyCode == 13) { joinCode_entered(); return false }\" onkeypress=\"return event.charCode >= 48 && event.charCode <= 57\" min=\"0\"> </input>";
+  echo "<input type=\"button\" id=\"CreateMatch_button\" hidden=\"false\" disabled=\"false\" value=\"Create Match\" onclick=\"return newMatch_Requested()\"></input>";
+  echo "<input type=\"button\" id=\"JoinCode_button\" hidden=\"true\" disabled=\"true\" value=\"Join Match\" onclick=\"return newMatch_Requested()\"></input>";
 
   echo "<div class=\"user_scoreCard_Lobbydisplay\">";
     $User_LobbyScore = R::load("save".$_SESSION["id"], 1);
@@ -1073,7 +1073,6 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
     echo "<h2>Win Streak: ".$User_LobbyScore->save4."</h2>";
     echo "<h2>Max Streak: "; if (intval($User_LobbyScore->save5) > 0) { echo $User_LobbyScore->save5; } else { echo "No Data"; } if (!isset($User_LobbyScore->save5)) { echo "Error:OOD-stat";} echo "</h2>";
     echo "</div>";
-
 
   echo "<div class=\"leaderBoard_Lobbydisplay\" >";
   $leaderboard_Aplicants = R::findAll("user");
@@ -1136,5 +1135,44 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
     echo "<div id=\"errorTab\">Match Spectating was Canceled</div>";
   }
 ?>
+
+<script> 
+  // if (document.getElementById("join_code_input").value == null) {
+  // document.getElementById("CreateMatch_button").hidden = true;
+  // document.getElementById("CreateMatch_button").disabled = true;
+  // }
+  // else if (document.getElementById("join_code_input").value != null) {
+  // document.getElementById("CreateMatch_button").hidden = false;
+  // document.getElementById("CreateMatch_button").disabled = false;
+  // }
+
+  const input = document.getElementById("join_code_input");
+const buttonEmpty = document.getElementById("CreateMatch_button");
+const buttonFilled = document.getElementById("JoinCode_button");
+
+input.addEventListener("input", () => {
+  if (input.value.trim() !== "") {
+    buttonEmpty.hidden = true;
+    buttonFilled.hidden = false;
+    buttonEmpty.disabled = true;
+    buttonFilled.disabled = false;
+  } else {
+    buttonEmpty.hidden = false;
+    buttonFilled.hidden = true;
+    buttonEmpty.disabled = false;
+    buttonFilled.disabled = true;
+  }
+});
+
+// input.addEventListener("input", () => {
+//   if (input.value.trim() !== "") {
+//     button.onclick = "return joinCode_entered()";
+//   } else {
+//     button.onclick = "return newMatch_Requested()";
+//   }
+// });
+  // echo "<input type=\"button\" value=\"Join Match\" onclick=\"return joinCode_entered()\"></input>";
+  // echo "}";
+</script>
 </body>
 </html>
