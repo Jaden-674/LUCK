@@ -2,6 +2,15 @@
 session_start();
 require("rb-sqlite.php");
 R::setup("sqlite:Saved_Info.db");
+
+if (isset($_SESSION["id"])) {
+$bannedCheck = R::load("user", $_SESSION["id"]);
+if ($bannedCheck->banned == "true") {
+    header("location: login.php?id=error4");
+    exit;
+  }
+}
+
 if (isset($_SESSION["CurrentGID_Code"])) { $viewingCode = $_SESSION["CurrentGID_Code"]; }
 if (isset($_SESSION["CurrentGID_Code"]) && $_SESSION["CurrentGID_Code"] == 0 && $_SESSION["local_totalMoves"] > 0) {  $_SESSION["local_totalMoves"] = 0; }
 
@@ -36,9 +45,9 @@ if (R::findOne('save', 'id = ?', [ $_SESSION["CurrentGID_Code"] ]) == null && $_
   $_SESSION["CurrentGID_Code"] = 0;
   header("location: play.php?error=11");
   exit;
-}
+} 
 
-//Json package
+//Json package 
 if($_SESSION["CurrentGID_Code"] != 0) {
   $item = R::load("save", $viewingCode);
   //Large
@@ -432,7 +441,6 @@ else{
 
 $added_users_all = R::load('save'.$_SESSION["id"], 1);
 $colourPreset_p5relay = $added_users_all->save1;
-// echo $_SESSION["local_totalMoves"];
 ?>
 <html style="background: #21323b">
 <head>
@@ -589,7 +597,6 @@ function checkData() {
   }
     })
 }
-
 // lets for values
 let grid = []
 let tileSize;
@@ -828,7 +835,6 @@ function draw() {
   text("P2[% No Player %]", 0, 175);
   }
   else { 
-
     if(colourBlind_mode == "off") {
       fill(250, 100, 100)
     }
@@ -871,7 +877,6 @@ let move_shift = 25;
 else {let move_shift = 0;}
 if (P5blue_used_Array2[P5blue_used_Array2.length-1] && Set_GameMode != 2)
 text("Last Blue:"+P5blue_used_Array2[P5blue_used_Array2.length-1], 0, 350+move_shift)
-// text("Connect At: "+en0_redirect_display, -width/2.8, 30);
 pop()
 
   if (set_winner_UID != -1) {
@@ -902,15 +907,6 @@ pop()
     pop()
   }
 }
-
-else {
-  textAlign(CENTER)
-  textSize(20);
-  fill("white")
-  translate(4.35*width/5, 0)
-  // text("Connect At: "+en0_redirect_display, -width/2.8, 30);
-}
-
   if(frameCount == 2 && SESSION_ServerLink > 0 && player_UID_2_usrn == "ƒ") {
     RightSet_Button.attribute("value", "Cancel Match and Exit");
     RightSet_Button.removeAttribute("hidden");
@@ -1062,7 +1058,7 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
     echo "<div id=\"lobby_overlay_html\">";
   echo "<input id=\"join_code_input\" type=\"number\" placeholder=\"Enter Game Code\" onkeydown=\"if (event.keyCode == 13) { joinCode_entered(); return false }\" onkeypress=\"return event.charCode >= 48 && event.charCode <= 57\" min=\"0\"> </input>";
   echo "<input type=\"button\" id=\"CreateMatch_button\" hidden=\"false\" disabled=\"false\" value=\"Create Match\" onclick=\"return newMatch_Requested()\"></input>";
-  echo "<input type=\"button\" id=\"JoinCode_button\" hidden=\"true\" disabled=\"true\" value=\"Join Match\" onclick=\"return newMatch_Requested()\"></input>";
+  echo "<input type=\"button\" id=\"JoinCode_button\" hidden=\"true\" disabled=\"true\" value=\"Join Match\" onclick=\"return joinCode_entered()\"></input>";
 
   echo "<div class=\"user_scoreCard_Lobbydisplay\">";
     $User_LobbyScore = R::load("save".$_SESSION["id"], 1);
@@ -1135,21 +1131,14 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
     echo "<div id=\"errorTab\">Match Spectating was Canceled</div>";
   }
 ?>
-
 <script> 
-  // if (document.getElementById("join_code_input").value == null) {
-  // document.getElementById("CreateMatch_button").hidden = true;
-  // document.getElementById("CreateMatch_button").disabled = true;
-  // }
-  // else if (document.getElementById("join_code_input").value != null) {
-  // document.getElementById("CreateMatch_button").hidden = false;
-  // document.getElementById("CreateMatch_button").disabled = false;
-  // }
-
-  const input = document.getElementById("join_code_input");
+const input = document.getElementById("join_code_input");
 const buttonEmpty = document.getElementById("CreateMatch_button");
 const buttonFilled = document.getElementById("JoinCode_button");
-
+window.onload = function() {
+  buttonEmpty.hidden = false;
+  buttonEmpty.disabled = false;
+};
 input.addEventListener("input", () => {
   if (input.value.trim() !== "") {
     buttonEmpty.hidden = true;
@@ -1163,16 +1152,6 @@ input.addEventListener("input", () => {
     buttonFilled.disabled = true;
   }
 });
-
-// input.addEventListener("input", () => {
-//   if (input.value.trim() !== "") {
-//     button.onclick = "return joinCode_entered()";
-//   } else {
-//     button.onclick = "return newMatch_Requested()";
-//   }
-// });
-  // echo "<input type=\"button\" value=\"Join Match\" onclick=\"return joinCode_entered()\"></input>";
-  // echo "}";
 </script>
 </body>
 </html>
