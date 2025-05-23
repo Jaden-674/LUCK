@@ -130,7 +130,7 @@ if (isset($_GET["GridUpdate"]) && $viewingCode != 0) {
             array_push($blue_used_Array, intval($_GET["ClickBase"])); 
             $winUpdate->d3 = json_encode($blue_used_Array);
           }
-          $winUpdate->winner_uid = json_encode([$_SESSION["id"], json_encode($checkGroup_array), rand(0,100), time()+6]);
+          $winUpdate->winner_uid = json_encode([$_SESSION["id"], json_encode($checkGroup_array), rand(0,100), time()+6, intval($_GET["ClickBase"])]);
           $winUpdate->turn_id[0] = "[-1";
           $winUpdate->total_moves = intval($winUpdate->total_moves)+1; 
           if (json_decode($winUpdate->uID_1)[0] != json_decode($winUpdate->uID_2)[0] && json_decode($winUpdate->uID_2)[0] != null) {
@@ -214,6 +214,7 @@ if (isset($_GET["GridUpdate"]) && $viewingCode != 0) {
   exit;
   }
   else { header("location: play.php"); }
+  // header("location: play.php");
 }
 
 
@@ -500,6 +501,7 @@ let local_UID = <?php echo intval($_SESSION["id"]);?>;
 let First_LargePacket_set = "false";
 
 function checkData() {
+  // fetchData("Large");
   if (player_UID_2_usrn == "ƒ") {
     fetch(window.location.href + '?FindingPlayer_data')
     .then(check_response => check_response.json())
@@ -518,7 +520,7 @@ function checkData() {
     fetch(window.location.href + '?check_data')
     .then(check_response => check_response.json())
     .then(data => {
-      if (data == null) {window.location.assign("/LUCK/play.php?error=13");}
+      if (data == null) { window.location.assign("/LUCK/play.php?error=11"); }
       if (data.T_M == 0 && player_UID_2_usrn == "ƒ") {
         fetchData("Large");
       }
@@ -551,7 +553,7 @@ function checkData() {
         if (player_UID_1_usrn == null) player_UID_1_usrn = "ƒ";
         if (player_UID_2_usrn == null) player_UID_2_usrn = "ƒ";
         set_winner_UID = parseInt(data.closedWinner_UID[0]);
-        if (data.closedWinner_UID.length == 4) {
+        if (data.closedWinner_UID.length == 5) {
         set_winning_array = JSON.parse(data.closedWinner_UID[1]);
         win_timeframe = data.closedWinner_UID[3];
         win_splash_random = parseInt(data.closedWinner_UID[2]);
@@ -564,6 +566,7 @@ function checkData() {
         }
       }
       if (queryType == "Small") {
+        if(data == null) { window.location.assign("/LUCK/play.php?error=11"); }
         client_totalMoves = parseInt(data.total_movesSync)+1;
         if (data.currentColour == "blue") { P5red_used_Array2.push(data.Gd_C); }
         if (data.currentColour == "red") { P5blue_used_Array2.push(data.Gd_C); }
@@ -574,9 +577,11 @@ function checkData() {
         if (data.turn_id == null) turn_id_current_ursn = "ƒ";
         else { turn_id_current_ursn = data.turn_id[1]; }
         set_winner_UID = parseInt(data.closedWinner_UID[0]);
-        if (data.closedWinner_UID.length == 4) {
+        if (data.closedWinner_UID.length == 5) {
         set_winning_array = JSON.parse(data.closedWinner_UID[1]);
         win_timeframe = data.closedWinner_UID[3];
+        if (data.currentColour == "red") { P5red_used_Array2.push(data.closedWinner_UID[4]); }
+        if (data.currentColour == "blue") { P5blue_used_Array2.push(data.closedWinner_UID[4]); }
         }
         else { set_winning_array = ["win_array_error"]; }
         win_splash_random = parseInt(data.closedWinner_UID[2]);
@@ -744,6 +749,13 @@ function setup() {
   MidSet_Button = createInput();
   MidSet_Button.attribute("hidden", "true");
   MidSet_Button.attribute("type", "button");
+
+
+  Exit_Button = createImg("exit-16.svg", "Exit");
+  Exit_Button.attribute("hidden", "true");
+  Exit_Button.attribute("id", "exit_match_button");
+  Exit_Button.attribute("onclick", "return CloseMatch_Request()");
+  
   
   imagetest.resize(windowHeight / 17, windowHeight / 17)
 }
@@ -780,6 +792,7 @@ function checklocation(base) {
     for (let check_PositionPD_positive = 1; check_PositionPD_positive<5;) { if((base+(14*check_PositionPD_positive))%15 != 14 && base+(14*check_PositionPD_positive) <= 224 && grid[base].type == grid[base+(14*check_PositionPD_positive)].type) {check_linePD.push(base+(14*check_PositionPD_positive));check_PositionPD_positive++;} else{check_PositionPD_positive=16} }
     if (check_linePD.length>=4) {location.href = "play.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_linePD[0]+"&&Check2="+check_linePD[1]+"&&Check3="+check_linePD[2]+"&&Check4="+check_linePD[3]+"&&TurnColour="+turn_colour_ghost; }
     if (check_lineX.length<4 && check_lineY.length<4 && check_lineND.length<4 && check_linePD.length<4) { 
+      // location.href = "play.php?Locked="+base+"&&GridUpdate="+turn_colour_ghost;
       fetch(window.location.href+"?Locked="+base+"&&GridUpdate="+turn_colour_ghost).then(clicked_response => clicked_response.json()).then(data => { 
       colourRelay = data.currentColour; 
       open_choices_Array = data.d1;
@@ -872,7 +885,7 @@ if (colourBlind_mode == "off")
 text("Last Red:"+P5red_used_Array2[P5red_used_Array2.length-1], 0, 325)
 if (colourBlind_mode == "protanopia")
 text("Last Yellow:"+P5red_used_Array2[P5red_used_Array2.length-1], 0, 325)
-let move_shift = 25;
+let move_shift = 0;
 }
 else {let move_shift = 0;}
 if (P5blue_used_Array2[P5blue_used_Array2.length-1] && Set_GameMode != 2)
@@ -894,7 +907,6 @@ pop()
   fill("yellow");
   textAlign(CENTER)
     if (win_splash_random != 1) {
-    
     textSize(70);
     if (player_UID_1 == set_winner_UID) { text(winning_username+" Wins!!", width/2, height/5); }
     else if (player_UID_2 == set_winner_UID) { text(winning_username+" Wins!!", width/2, height/5); }
@@ -904,6 +916,11 @@ pop()
       if (player_UID_1 == set_winner_UID) { text("Skill? Luck? Who Cares,", width/2, height/6); text(winning_username+" Wins!", width/2, height/4); }
       else if (player_UID_2 == set_winner_UID) { text("Skill? Luck? Who Cares,", width/2, height/6); text(winning_username+" Wins!", width/2, height/4); }
     }
+    // if (win_splash_random == 2) {
+    //   textSize(50);
+    //   if (player_UID_1 == set_winner_UID) { text("Silly Zegroes, ", width/2, height/6); text(winning_username+" Wins!", width/2, height/4); }
+    //   else if (player_UID_2 == set_winner_UID) { text("Silly Zegroes, ", width/2, height/6); text(winning_username+" Wins!", width/2, height/4); }
+    // }
     pop()
   }
 }
@@ -967,7 +984,15 @@ pop()
       RightSet_Button.attribute("value", close_match_text_ghost);
     }
   }
+  if (frameCount == 2 && SESSION_ServerLink > 0 && player_UID_2_usrn != "ƒ" && set_winner_UID == -1) {
+  Exit_Button.removeAttribute("hidden");
+  }
+  else if (frameCount == 2 && SESSION_ServerLink > 0 && player_UID_2_usrn != "ƒ" && set_winner_UID != -1) {
+  Exit_Button.Attribute("hidden", "true");
+  }
 }
+
+
 </script>
 <?php
 $user_found = R::findAll('user');
@@ -977,7 +1002,7 @@ foreach($user_found as $row) {
     array_push($verifiedCheck_array, $row->id);
   }
 }
-// if (in_array($_SESSION["id"], $verifiedCheck_array)) { 
+if (in_array($_SESSION["id"], $verifiedCheck_array)) { 
 echo "<div class=\"sidebar_fixed\">LUCK Beta 5.4.[29/4]<br><br>";
 
 echo "<script>";
@@ -1021,10 +1046,9 @@ foreach($user_found as $row) {
     else {
       echo "<a href=\"play.php?newServerLink=clean\">Create fresh Match</a>";
     }
-  // }
+  }
 ?>
   </div>
-  <!--html game overlay code start -->
   <script>
     function joinCode_entered() { 
       window.location.assign("/LUCK/play.php?reset=true&&ServerLink="+document.getElementById("join_code_input").value); 
@@ -1049,10 +1073,12 @@ foreach($user_found as $row) {
     }
   </script>
   <?php
+  $match_overlay_dataPull = R::load("save", $viewingCode);
 // ip splash
 echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig getifaddr en0"))."</div>";
+// exit button
+// if ($_SESSION["CurrentGID_Code"] != 0 && $match_overlay_dataPull->uID_2 != null) { echo "<img id=\"exit_match_button\" src=\"exit-16.svg\" onclick=\"return CloseMatch_Request()\"></img>"; }
   //lobby code start
-  $match_overlay_dataPull = R::load("save", $viewingCode);
   if ($_SESSION["CurrentGID_Code"] == 0) {
     echo "<div id=\"titleSplash_text\"> LUCK </div>";
     echo "<div id=\"lobby_overlay_html\">";
@@ -1132,6 +1158,7 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
   }
 ?>
 <script> 
+if (SESSION_ServerLink == 0) {
 const input = document.getElementById("join_code_input");
 const buttonEmpty = document.getElementById("CreateMatch_button");
 const buttonFilled = document.getElementById("JoinCode_button");
@@ -1152,6 +1179,7 @@ input.addEventListener("input", () => {
     buttonFilled.disabled = true;
   }
 });
+}
 </script>
 </body>
 </html>

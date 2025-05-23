@@ -362,3 +362,21 @@ width: 0px;
   /* background-color: red; */
   transform: translate(0px, 0.5vh);
 }
+
+#exit_match_button {
+  background-color: transparent;
+  padding: 1vh;
+  border: slategray solid 1px ;
+  border-radius: 20px;
+  max-width: 7.5vh;
+  max-height: 7.5vh;
+  margin-bottom: -9.5vh;
+  margin-top: -96vh;
+  margin-left: 1.5vh;
+  transform: rotateZ(180deg) rotateX(180deg) rotateY(180deg);
+    transition: background-color 0.3s;
+}
+
+#exit_match_button:hover {
+  background-color: rgb(255, 45, 45);
+}
