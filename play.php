@@ -102,8 +102,7 @@ if (isset($_GET["FindingPlayer_data"])) {
   echo json_encode($Find_player_response);
   exit;
 }
-// localhost/LUCK/play.php?GridUpdate=win&&ClickBase=153&&Check1=139&&Check2=125&&Check3=111&&Check4=97&&TurnColour=blue
-// localhost/LUCK/play.php?Locked=***&&GridUpdate=red
+
 if (isset($_GET["GridUpdate"]) && $viewingCode != 0) {
   if ($_GET["GridUpdate"] == "win") {
     $winUpdate = R::load("save", $viewingCode);
@@ -153,7 +152,9 @@ if (isset($_GET["GridUpdate"]) && $viewingCode != 0) {
   }
   if ($_GET["GridUpdate"] == "red" || $_GET["GridUpdate"] == "blue") {
     $saveUpdate = R::load("save", $viewingCode);
-      if (isset($_SESSION["id"]) && $_SESSION["id"] == json_decode($saveUpdate->turn_id)[0] && (($_SESSION["id"] == json_decode($saveUpdate->uID_1)[0] && isset(json_decode($saveUpdate->uID_1)[0])) || ($_SESSION["id"] == json_decode($saveUpdate->uID_2)[0] && isset(json_decode($saveUpdate->uID_1)[0])))) 
+      if (isset($_SESSION["id"]) && $_SESSION["id"] == json_decode($saveUpdate->turn_id)[0] && (($_SESSION["id"] == json_decode($saveUpdate->uID_1)[0] && isset(json_decode($saveUpdate->uID_1)[0])) || ($_SESSION["id"] == json_decode($saveUpdate->uID_2)[0] && isset(json_decode($saveUpdate->uID_1)[0])))) {
+        // $expansion_new_open = [];
+        // $expansion_grey_open = [];
         $red_used_Array = json_decode($saveUpdate->d2, true) ?: []; 
         $blue_used_Array = json_decode($saveUpdate->d3, true) ?: [];
         $newOpenArray = array_values(array_merge(json_decode($saveUpdate->d1, true), $red_used_Array, $blue_used_Array));
@@ -215,6 +216,7 @@ if (isset($_GET["GridUpdate"]) && $viewingCode != 0) {
   }
   else { header("location: play.php"); }
   // header("location: play.php");
+}
 }
 
 
@@ -487,8 +489,8 @@ let player_UID_2 = -1;
 let turn_id_current = -1;
 let Game_ID_code = "UNDEF";
 let sides_counter_display = 0;
-let P5red_used_Array2 = []
-let P5blue_used_Array2 = []
+let P5red_used_Array = []
+let P5blue_used_Array = []
 let player_UID_1_usrn = "ƒ";
 let player_UID_2_usrn = "ƒ";
 let set_winner_UID = -1;
@@ -539,8 +541,8 @@ function checkData() {
         Game_ID_code = data.G_ID_code; 
         open_choices_Array = data.d1;
         sides_display_Array = data.d1_side;
-        P5red_used_Array2 = data.d2;
-        P5blue_used_Array2 = data.d3;
+        P5red_used_Array = data.d2;
+        P5blue_used_Array = data.d3;
         colourRelay = data.currentColour;
         player_UID_1 = parseInt(data.playerA); 
         player_UID_2 = parseInt(data.playerB);
@@ -568,8 +570,8 @@ function checkData() {
       if (queryType == "Small") {
         if(data == null) { window.location.assign("/LUCK/play.php?error=11"); }
         client_totalMoves = parseInt(data.total_movesSync)+1;
-        if (data.currentColour == "blue") { P5red_used_Array2.push(data.Gd_C); }
-        if (data.currentColour == "red") { P5blue_used_Array2.push(data.Gd_C); }
+        if (data.currentColour == "blue") { P5red_used_Array.push(data.Gd_C); }
+        if (data.currentColour == "red") { P5blue_used_Array.push(data.Gd_C); }
         colourRelay = data.currentColour;
         open_choices_Array = data.d1;
         sides_display_Array = data.d1_side;
@@ -580,8 +582,8 @@ function checkData() {
         if (data.closedWinner_UID.length == 5) {
         set_winning_array = JSON.parse(data.closedWinner_UID[1]);
         win_timeframe = data.closedWinner_UID[3];
-        if (data.currentColour == "red") { P5red_used_Array2.push(data.closedWinner_UID[4]); }
-        if (data.currentColour == "blue") { P5blue_used_Array2.push(data.closedWinner_UID[4]); }
+        if (data.currentColour == "red") { P5red_used_Array.push(data.closedWinner_UID[4]); }
+        if (data.currentColour == "blue") { P5blue_used_Array.push(data.closedWinner_UID[4]); }
         }
         else { set_winning_array = ["win_array_error"]; }
         win_splash_random = parseInt(data.closedWinner_UID[2]);
@@ -594,11 +596,11 @@ function checkData() {
     for(let k2 = 0; k2<open_choices_Array.length; k2++) {
     grid[open_choices_Array[k2]].type = "open";
   }
-    for(let k_red2 = 0; k_red2<P5red_used_Array2.length; k_red2++) {
-    grid[P5red_used_Array2[k_red2]].type = "red";
+    for(let k_red2 = 0; k_red2<P5red_used_Array.length; k_red2++) {
+    grid[P5red_used_Array[k_red2]].type = "red";
   }
-    for(let k_blue2 = 0; k_blue2<P5blue_used_Array2.length; k_blue2++) {
-    grid[P5blue_used_Array2[k_blue2]].type = "blue";
+    for(let k_blue2 = 0; k_blue2<P5blue_used_Array.length; k_blue2++) {
+    grid[P5blue_used_Array[k_blue2]].type = "blue";
   }
     })
 }
@@ -607,7 +609,7 @@ let grid = []
 let tileSize;
 let gridSize = 15
 let all_sides = []
-let width_divide = 4
+let grid_shift;
 let move_shift = 0;
 let en0_redirect_display = "<?php echo $ip;?>";
 let colourBlind_mode = "<?php echo $colourPreset_p5relay; ?>";
@@ -621,6 +623,7 @@ let RightSet_Button;
 let overlay;
 let Set_GameMode_display;
 let winning_username = -1;
+let Exit_Button_1pass = "false";
 
 class Square {
   constructor(x, y, size, type, id) {
@@ -629,6 +632,7 @@ class Square {
     this.size = size;
     this.type = type;
     this.id = id;
+    grid_shift = width/2-7.5*windowHeight/17;
   }
 
   draw() {
@@ -661,8 +665,8 @@ class Square {
   push()
     if (set_winner_UID == -1) {stroke("#21323b");}
     else{stroke("#525D64");}
-    rect(this.x + width / width_divide, this.y + windowHeight / 17, this.size, this.size);
-    if (mouseX > this.x+width/width_divide && mouseX < this.x+width/width_divide+this.size &&
+    rect(this.x+grid_shift, this.y + windowHeight / 17, this.size, this.size);
+    if (mouseX > this.x+grid_shift && mouseX < this.x+grid_shift+this.size &&
         mouseY > this.y + windowHeight/17 && mouseY < this.y+windowHeight/17+this.size && this.type == "open") {
           push()
           if (((player_UID_1 == turn_id_current && turn_id_current == local_UID) || (player_UID_2 == turn_id_current && turn_id_current == local_UID)) && player_UID_2 > 0 && set_winner_UID == -1) {
@@ -671,7 +675,7 @@ class Square {
             if (colourRelay == "blue") {fill(0, 0, 255, 30)}
           }
           else if (player_UID_2 > 0 && set_winner_UID == -1){fill(0, 0, 0, 20)}
-          rect(this.x + width / width_divide, this.y + windowHeight / 17, this.size, this.size);
+          rect(this.x + grid_shift, this.y + windowHeight / 17, this.size, this.size);
           pop()
         }
 pop()
@@ -681,13 +685,13 @@ pop()
 // else { tint(25, 25, 25, 80) }
 // // pixelDensity(1)
 // noSmooth()
-// image(imagetest, this.x + width / width_divide, this.y + windowHeight / 17)
+// image(imagetest, this.x + width / grid_shift, this.y + windowHeight / 17)
 // pop()
 // }
 push()
 noStroke()
     textFont(font);
-    textSize(20);
+    textSize(1.2*windowWidth/100);
     fill("#21323b");
     if (set_winning_array.includes(this.id)) {
       fill(220, 220, 0)
@@ -695,15 +699,15 @@ noStroke()
     if (set_winning_array.includes(this.id) && colourRelay == "red" && colourBlind_mode == "protanopia") {
       fill("black")
     }
-    textAlign(CENTER)
-    text(this.id, this.x + width / width_divide + this.size/2, this.y + windowHeight / 17 + this.size / 2+7.5);
+    textAlign(CENTER, CENTER)
+    text(this.id, this.x + grid_shift + this.size/2, this.y + windowHeight / 17+ 3*this.size/7);
     pop()
 
   if (set_winner_UID != -1 && !set_winning_array.includes(this.id)) {
     push()
     stroke("#5B656A");
     fill(180, 180, 180, 150)
-    rect(this.x + width / width_divide, this.y + windowHeight / 17, this.size, this.size);
+    rect(this.x + grid_shift, this.y + windowHeight / 17, this.size, this.size);
     pop()
   }
   }
@@ -766,7 +770,7 @@ function touchStarted() {
 function mouseClicked() {
   if (((player_UID_1 == turn_id_current && turn_id_current == local_UID) || (player_UID_2 == turn_id_current && turn_id_current == local_UID)) && player_UID_2 > 0 && set_winner_UID == -1) {
   for (let i = 0; i < 224; i++) {
-        if (mouseX > grid[i].x+width/width_divide && mouseX < grid[i].x+width/width_divide+grid[i].size &&
+        if (mouseX > grid[i].x+grid_shift && mouseX < grid[i].x+grid_shift+grid[i].size &&
         mouseY > grid[i].y + windowHeight/17 && mouseY < grid[i].y+windowHeight/17+grid[i].size && grid[i].type == "open") {
       grid[i].type = colourRelay;
       turn_colour_ghost = colourRelay;
@@ -792,12 +796,14 @@ function checklocation(base) {
     for (let check_PositionPD_positive = 1; check_PositionPD_positive<5;) { if((base+(14*check_PositionPD_positive))%15 != 14 && base+(14*check_PositionPD_positive) <= 224 && grid[base].type == grid[base+(14*check_PositionPD_positive)].type) {check_linePD.push(base+(14*check_PositionPD_positive));check_PositionPD_positive++;} else{check_PositionPD_positive=16} }
     if (check_linePD.length>=4) {location.href = "play.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_linePD[0]+"&&Check2="+check_linePD[1]+"&&Check3="+check_linePD[2]+"&&Check4="+check_linePD[3]+"&&TurnColour="+turn_colour_ghost; }
     if (check_lineX.length<4 && check_lineY.length<4 && check_lineND.length<4 && check_linePD.length<4) { 
-      // location.href = "play.php?Locked="+base+"&&GridUpdate="+turn_colour_ghost;
       fetch(window.location.href+"?Locked="+base+"&&GridUpdate="+turn_colour_ghost).then(clicked_response => clicked_response.json()).then(data => { 
       colourRelay = data.currentColour; 
+      if (colourRelay == "blue") { P5red_used_Array.push(base); }
+      else { P5blue_used_Array.push(base); }
       open_choices_Array = data.d1;
       sides_display_Array = data.d1_side;
-      turn_id_current = parseInt(data.turn_id);
+      turn_id_current = data.turn_id[0]; 
+      turn_id_current_ursn = data.turn_id[1];
       client_totalMoves = parseInt(data.T_M)+1;
       if ( Set_GameMode != 2 ) {
         for (let sides_counter = 0; sides_counter<sides_display_Array.length; sides_counter++) {
@@ -835,17 +841,17 @@ function draw() {
       text("L#"+local_UID+":P#"+player_UID_1+"?"+player_UID_2+":G#"+Game_ID_code+":T#"+turn_id_current+":WU#"+set_winner_UID+":§"+(((player_UID_1 == turn_id_current && turn_id_current == local_UID) || (player_UID_2 == turn_id_current && turn_id_current == local_UID)) && player_UID_2 > 0 && set_winner_UID == -1)+":<"+client_totalMoves+">", width/85, height/50)
       pop()
       textAlign(CENTER)
-    textSize(20);
+      textSize(1.5*windowWidth/100);
 
-  translate(4.35*width/5, 0)
+  translate(4.32*width/5, 0)
   push()
   fill(100, 100, 250); 
-  text("P1["+player_UID_1_usrn+"]", 0, 150)
+  text("P1["+player_UID_1_usrn+"]", 0, 30*windowHeight/100)
   pop()
   push()
   if (player_UID_2_usrn == "ƒ") {
   fill("#ff8800");
-  text("P2[% No Player %]", 0, 175);
+  text("P2[% No Player %]", 0, 32.5*windowHeight/100);
   }
   else { 
     if(colourBlind_mode == "off") {
@@ -854,19 +860,19 @@ function draw() {
     if (colourBlind_mode == "protanopia") {
       fill("#ffd940")
     }
-    text("P2["+player_UID_2_usrn+"]", 0, 175); 
+    text("P2["+player_UID_2_usrn+"]", 0, 34*windowHeight/100); 
   }
   pop()
     fill("white")
-  text("Game Code: "+Game_ID_code, 0, 225)
+  text("Game Code: "+Game_ID_code, 0, 15.5*windowHeight/100)
   if (turn_id_current_ursn != "ƒ" && player_UID_1_usrn != player_UID_2_usrn)
-  text("It's "+turn_id_current_ursn+"'s Turn", 0, 250)
+  text("It's "+turn_id_current_ursn+"'s Turn", 0, 25*windowHeight/100)
     if(!((player_UID_1 == turn_id_current && turn_id_current == local_UID) || (player_UID_2 == turn_id_current && turn_id_current == local_UID)) && (local_UID == player_UID_1 || local_UID == player_UID_2) && player_UID_2 > 0 && set_winner_UID == -1) {
     push()
-    translate(10,-height/4.1)
+    translate(width/75,0)
     push()
-    textSize(17);
-    text("Waiting for Opponent", -width/30, 287.5) 
+    textSize(1.2*windowWidth/100);
+    text("Waiting for Opponent", -width/22, 7*windowHeight/100) 
     pop()
     for (let circle_i = 0; circle_i < 3; circle_i++) {
     let active = constrain((frameCount)/2 % 60 - circle_i * 15, 0, 20);
@@ -874,22 +880,22 @@ function draw() {
     push()
     noStroke()
     fill(255, sin(progress) * 255);
-    circle(70 +4*circle_i/5 * 30, 6.1*height/17 -sin(progress) * 15, 5);
+    circle(width/22 +4*circle_i/5 * 30,  7*windowHeight/100 -sin(progress) * 15, 5);
     pop()
   }
     pop()
   }
-  if (Set_GameMode != 5) { text("Side Count:"+sides_display_Array.length+" ("+parseFloat((2/sides_display_Array.length*100).toFixed(2))+"%)", 0, 300); } else { text("Side Count: 0? (maybe%)" , 0, 300);}
-if (P5red_used_Array2[P5red_used_Array2.length-1] && Set_GameMode != 2) {
+  if (Set_GameMode != 5) { text("Side Count:"+sides_display_Array.length+" ("+parseFloat((2/sides_display_Array.length*100).toFixed(2))+"%)", 0, 45*windowHeight/100); } else { text("Side Count: 0? (maybe%)" , 0, 45*windowHeight/100);}
+if (P5red_used_Array[P5red_used_Array.length-1] && Set_GameMode != 2) {
 if (colourBlind_mode == "off")
-text("Last Red:"+P5red_used_Array2[P5red_used_Array2.length-1], 0, 325)
+text("Last Red:"+P5red_used_Array[P5red_used_Array.length-1], 0, 32.5*windowHeight/100)
 if (colourBlind_mode == "protanopia")
-text("Last Yellow:"+P5red_used_Array2[P5red_used_Array2.length-1], 0, 325)
+text("Last Yellow:"+P5red_used_Array[P5red_used_Array.length-1], 0, 32.5*windowHeight/100)
 let move_shift = 0;
 }
 else {let move_shift = 0;}
-if (P5blue_used_Array2[P5blue_used_Array2.length-1] && Set_GameMode != 2)
-text("Last Blue:"+P5blue_used_Array2[P5blue_used_Array2.length-1], 0, 350+move_shift)
+if (P5blue_used_Array[P5blue_used_Array.length-1] && Set_GameMode != 2)
+text("Last Blue:"+P5blue_used_Array[P5blue_used_Array.length-1], 0, 37*windowHeight/100)
 pop()
 
   if (set_winner_UID != -1) {
@@ -907,20 +913,15 @@ pop()
   fill("yellow");
   textAlign(CENTER)
     if (win_splash_random != 1) {
-    textSize(70);
+      textSize(4.5*windowWidth/100);
     if (player_UID_1 == set_winner_UID) { text(winning_username+" Wins!!", width/2, height/5); }
     else if (player_UID_2 == set_winner_UID) { text(winning_username+" Wins!!", width/2, height/5); }
   }
     if (win_splash_random == 1) {
-      textSize(50);
+      textSize(3.5*windowWidth/100);
       if (player_UID_1 == set_winner_UID) { text("Skill? Luck? Who Cares,", width/2, height/6); text(winning_username+" Wins!", width/2, height/4); }
       else if (player_UID_2 == set_winner_UID) { text("Skill? Luck? Who Cares,", width/2, height/6); text(winning_username+" Wins!", width/2, height/4); }
     }
-    // if (win_splash_random == 2) {
-    //   textSize(50);
-    //   if (player_UID_1 == set_winner_UID) { text("Silly Zegroes, ", width/2, height/6); text(winning_username+" Wins!", width/2, height/4); }
-    //   else if (player_UID_2 == set_winner_UID) { text("Silly Zegroes, ", width/2, height/6); text(winning_username+" Wins!", width/2, height/4); }
-    // }
     pop()
   }
 }
@@ -984,15 +985,14 @@ pop()
       RightSet_Button.attribute("value", close_match_text_ghost);
     }
   }
-  if (frameCount == 2 && SESSION_ServerLink > 0 && player_UID_2_usrn != "ƒ" && set_winner_UID == -1) {
+  if (frameCount >= 2 && Exit_Button_1pass == "false" && SESSION_ServerLink > 0 && player_UID_2_usrn != "ƒ" && set_winner_UID == -1) {
   Exit_Button.removeAttribute("hidden");
+  Exit_Button_1pass = "true";
   }
-  else if (frameCount == 2 && SESSION_ServerLink > 0 && player_UID_2_usrn != "ƒ" && set_winner_UID != -1) {
-  Exit_Button.Attribute("hidden", "true");
+  if (frameCount == 2 && SESSION_ServerLink > 0 && player_UID_2_usrn != "ƒ" && set_winner_UID != -1) {
+  Exit_Button.attribute("hidden", "true");
   }
 }
-
-
 </script>
 <?php
 $user_found = R::findAll('user');
