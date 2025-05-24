@@ -162,13 +162,16 @@ input::placeholder {
   white-space: nowrap;
   border: none;
   color: black;
+  overscroll-behavior-y: none;
   /* color: #394a55 */
 }
 
 .user_scoreCard_Lobbydisplay h1{
-  margin-top: 1.5vh;
-  padding-bottom: 1.5vh;
+  background-color: rgb(97, 115, 197);
   border-bottom: 1px solid #11374a;
+  margin: 0vh;; 
+  padding-top: 1vh;
+  padding-bottom: 1.5vh;
 }
 
 .user_scoreCard_Lobbydisplay h2{

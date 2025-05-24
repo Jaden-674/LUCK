@@ -536,7 +536,8 @@ function checkData() {
     fetch(window.location.href + '?check_data')
     .then(check_response => check_response.json())
     .then(data => {
-      if (data == null) { window.location.assign("/LUCK/play.php?error=11"); }
+      if (data == null && set_winner_UID == -1) { window.location.assign("/LUCK/play.php?error=12.1");}
+      else if (data == null && local_UID != player_UID_1 && local_UID != player_UID_2 ) { window.location.assign("/LUCK/play.php?error=13"); }
       if (data.T_M == 0 && player_UID_2_usrn == "ƒ") {
         fetchData("Large");
       }
@@ -563,13 +564,14 @@ function checkData() {
         turn_id_current = parseInt(data.turn_id);
         if (data.turn_id == null) turn_id_current_ursn = "ƒ";
         else { turn_id_current_ursn = data.turn_id[1]; }
-        if (data.playerA == null) {window.location.assign("/LUCK/play.php?error=12.1");}
+        if (data.playerA == null) {window.location.assign("/LUCK/play.php?error=11");}
         player_UID_1_usrn = data.playerA[1];
         if (data.playerB != null) { player_UID_2_usrn = data.playerB[1]; }
         if (player_UID_1_usrn == null) player_UID_1_usrn = "ƒ";
         if (player_UID_2_usrn == null) player_UID_2_usrn = "ƒ";
         set_winner_UID = parseInt(data.closedWinner_UID[0]);
         if (data.closedWinner_UID.length == 5) {
+        Exit_Button.attribute("hidden", "true");
         set_winning_array = JSON.parse(data.closedWinner_UID[1]);
         win_timeframe = data.closedWinner_UID[3];
         win_splash_random = parseInt(data.closedWinner_UID[2]);
@@ -594,6 +596,7 @@ function checkData() {
         else { turn_id_current_ursn = data.turn_id[1]; }
         set_winner_UID = parseInt(data.closedWinner_UID[0]);
         if (data.closedWinner_UID.length == 5) {
+        Exit_Button.attribute("hidden", "true");
         set_winning_array = JSON.parse(data.closedWinner_UID[1]);
         win_timeframe = data.closedWinner_UID[3];
         if (data.currentColour == "red") { P5red_used_Array.push(data.closedWinner_UID[4]); }
@@ -811,7 +814,7 @@ function checklocation(base) {
     if (check_linePD.length>=4) {location.href = "play.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_linePD[0]+"&&Check2="+check_linePD[1]+"&&Check3="+check_linePD[2]+"&&Check4="+check_linePD[3]+"&&TurnColour="+turn_colour_ghost; }
     if (check_lineX.length<4 && check_lineY.length<4 && check_lineND.length<4 && check_linePD.length<4) { 
       fetch(window.location.href+"?Locked="+base+"&&GridUpdate="+turn_colour_ghost).then(clicked_response => clicked_response.json()).then(data => { 
-      if(data == null) { window.location.assign("/LUCK/play.php?error=12.1"); }
+      if( data == null ) { window.location.assign("/LUCK/play.php?error=12.1"); }
       colourRelay = data.currentColour; 
       if (colourRelay == "blue") { P5red_used_Array.push(base); }
       else { P5blue_used_Array.push(base); }
@@ -1004,9 +1007,9 @@ pop()
   Exit_Button.removeAttribute("hidden");
   Exit_Button_1pass = "true";
   }
-  if (frameCount == 2 && SESSION_ServerLink > 0 && player_UID_2_usrn != "ƒ" && set_winner_UID != -1) {
-  Exit_Button.attribute("hidden", "true");
-  }
+  // if (frameCount == 2 && SESSION_ServerLink > 0 && player_UID_2_usrn != "ƒ" && set_winner_UID != -1) {
+  // Exit_Button.attribute("hidden", "true");
+  // }
 }
 </script>
 <?php
