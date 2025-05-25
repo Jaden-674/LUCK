@@ -295,6 +295,7 @@ if (isset($_GET["newServerLink"]) && $_GET["newServerLink"] == "clean") {
     } 
   }
   if (intval(count($foundSessionMatches)) == 0) {
+
   $createNewMatch = R::dispense("save");
   $createNewMatch->d1 = json_encode([96, 97, 98, 111, 112, 113, 126, 127, 128]);
   $createNewMatch->d1_side = json_encode([81,82,83,95,99,110,114,125,129,141,142,143]);
@@ -307,8 +308,8 @@ if (isset($_GET["newServerLink"]) && $_GET["newServerLink"] == "clean") {
   $createNewMatch->game_mode = 1;
   $createNewMatch->total_moves = 0;
   $createNewMatch->ghost_d1 = json_encode([]);
-  $_SESSION["CurrentGID_Code"] = $createNewMatch->id;
   R::store($createNewMatch);
+    $_SESSION["CurrentGID_Code"] = $createNewMatch->id;
   header("location: play.php?ServerLink=".$createNewMatch->id);
   }
   else {

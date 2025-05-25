@@ -112,6 +112,7 @@ body {
   white-space: nowrap;
   border: 0.15vw solid black;
   border-radius: 10px;
+  text-transform: uppercase;
 }
 
 #lobby_overlay_html input[type=button]{
@@ -133,6 +134,13 @@ body {
   cursor: pointer;
 }
 
+input::placeholder {
+  color: black;
+  font-size: 35px;
+  opacity: 0.5;
+  text-transform: capitalize;
+}
+
 #lobby_overlay_html input[type=button]:hover {
   background-color: lightblue;
 }
@@ -141,12 +149,6 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0px;
-}
-
-input::placeholder {
-  color: black;
-  font-size: 35px;
-  opacity: 0.5;
 }
 
 .user_scoreCard_Lobbydisplay {
