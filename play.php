@@ -1007,9 +1007,6 @@ pop()
   Exit_Button.removeAttribute("hidden");
   Exit_Button_1pass = "true";
   }
-  // if (frameCount == 2 && SESSION_ServerLink > 0 && player_UID_2_usrn != "ƒ" && set_winner_UID != -1) {
-  // Exit_Button.attribute("hidden", "true");
-  // }
 }
 </script>
 <?php
@@ -1094,9 +1091,7 @@ foreach($user_found as $row) {
   $match_overlay_dataPull = R::load("save", $viewingCode);
 // ip splash
 echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig getifaddr en0"))."</div>";
-// exit button
-// if ($_SESSION["CurrentGID_Code"] != 0 && $match_overlay_dataPull->uID_2 != null) { echo "<img id=\"exit_match_button\" src=\"exit-16.svg\" onclick=\"return CloseMatch_Request()\"></img>"; }
-  //lobby code start
+//lobby code start
   if ($_SESSION["CurrentGID_Code"] == 0) {
     echo "<div id=\"titleSplash_text\"> LUCK </div>";
     echo "<div id=\"lobby_overlay_html\">";
