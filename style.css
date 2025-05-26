@@ -103,7 +103,7 @@ body {
   line-height: 6.25vh;
   width: 25vw;
   transform: translate(37.5vw, 37.5vh);
-  background-color: aliceblue;
+  background-color: #d9edff;
   position: fixed;
   text-align: center;
   font-size: 70px;
@@ -121,7 +121,7 @@ body {
   line-height: 6.25vh;
   width: 25vw;
   transform: translate(37.5vw, 52.5vh);
-  background-color: aliceblue;
+  background-color: #d9edff;
   position: fixed; 
   text-align: center;
   z-index: 1;
@@ -156,15 +156,16 @@ input::-webkit-inner-spin-button {
   height: 45vh;
   width: 25vw;
   transform: translate(73.5vw, 52.5vh);
-  background-color: aliceblue;
+  background-color: #d9edff;
   position: fixed;
   text-align: center;
   z-index: 1;
   overflow-x: scroll;
   white-space: nowrap;
-  border: none;
   color: black;
   overscroll-behavior-y: none;
+  border-radius: 10px;
+  border: 0.15vw solid black;
   /* color: #394a55 */
 }
 
@@ -187,13 +188,15 @@ input::-webkit-inner-spin-button {
   width: 25vw;
   height: 51.25vh;
   transform: translate(1.5vw, 45.75vh);
-  background-color: aliceblue;
+  background-color: #d9edff;
   position: fixed;
   text-align: center;
   z-index: 1; 
   overflow-x: scroll; 
   overflow-y: scroll; 
   overscroll-behavior-y: none;
+  border-radius: 10px;
+  border: 0.15vw solid black;
 }
 
 .leaderBoard_Lobbydisplay h1{
@@ -213,7 +216,6 @@ cursor: pointer;
   padding-top: 1.5vh;
   padding-bottom: 1.5vh;
   border-bottom: 1px dashed black;  
-
 }
 
 #leaderboard_localBG {
@@ -221,14 +223,14 @@ cursor: pointer;
 }
 
 #goldtext_LeaderBoard {
-  background: linear-gradient(70deg, rgba(186,148,62,1) 0%, rgba(236,172,32,1) 20%, rgba(186,148,62,1) 39%, rgba(249,244,180,1) 50%, rgba(186,148,62,1) 60%, rgba(236,172,32,1) 80%, rgba(186,148,62,1) 100%);
+  background: linear-gradient(70deg, rgba(186,148,62,1) 0%, rgba(236,172,32,1) 20%, rgba(186,148,62,1) 39%, rgba(249,244,180,1) 50%, rgba(186,148,62,1) 60%, rgba(236,172,32,1) 80%, rgb(255, 209, 103) 100%);
   background-clip: text;
   -webkit-text-fill-color: transparent;	
   animation: shine 4.5s infinite;
   background-size: 300%;
   background-position: left;
   animation-timing-function: linear;
-  animation-direction: alternate;;
+  animation-direction: alternate;
 
 }
 @keyframes shine {
@@ -253,11 +255,65 @@ cursor: pointer;
   /* opacity: 35%; */
 }
 
+#currentMatches_display {
+  font-family: "MyFont";
+  width: 25vw;
+  height: 40vh;
+  transform: translate(1.5vw, 2.5vh);
+  background-color: #d9edff;
+  position: fixed;
+  text-align: center;
+  z-index: 1; 
+  overflow-x: scroll; 
+  overflow-y: scroll; 
+  overscroll-behavior: none;
+  border-radius: 10px;
+  border: 0.15vw solid black;
+}
+
+#currentMatches_display h1{
+  margin: 0vh;
+  border-bottom: 1px solid black; 
+  padding-top: 1vh;
+  padding-bottom: 1vh;
+  z-index: 20;
+}
+
+#currentMatches_display h2{
+  margin: 0vh;
+  width: 75%;
+  max-height: 4vh;
+  padding-top: 1.5vh;
+  padding-bottom: 1.5vh;
+  border-bottom: 1px dashed black;  
+  border-right: 1px solid rgb(177, 177, 177); 
+  overflow-x: scroll;
+  overflow-y: hidden;
+  margin-bottom: -7.1vh;
+  cursor: default;
+}
+
+#joinMatch_miniButton {
+  margin-left: -18.75vw;
+  width: 6.25vw;
+  height: 6.9vh;
+  transform: translate(18.8vw, 0.075vh);
+  background-color: #d9edff;
+  border-bottom: 1px dashed black; 
+  z-index: 10; 
+}
+
+#joinMatch_miniButton:hover{
+  background-color: lightblue;
+  cursor: pointer;
+}
+
+
 #rightSet_match_button {
   margin-top: 85vh;
   margin-bottom: -85vh;
   transform: translate(72.5vw, -100vh);
-  background-color: aliceblue;
+  background-color: #d9edff;
   opacity: 45%;
   
 }
@@ -271,7 +327,7 @@ cursor: pointer;
   margin-top: 85vh;
   margin-bottom: -85vh;
   transform: translate(2.5vw, -100vh);
-  background-color: aliceblue;
+  background-color: #d9edff;
   z-index: 20;
   opacity: 45%;
 }
@@ -285,7 +341,7 @@ cursor: pointer;
   margin-top: 85vh;
   margin-bottom: -85vh;
   transform: translate(37.5vw, -100vh);
-  background-color: aliceblue;
+  background-color: #d9edff;
   opacity: 45%;
   /* font-size: 1px; */
 }
@@ -347,17 +403,24 @@ width: 0px;
   margin: auto;
   text-align: center;
   margin-bottom: -25vh;
-  transform: translate(0vw, 0vh);
-  color: lightblue;
-  /* background-color: red; */
+  transform: translate(-1vw, 0vh);
+    -webkit-text-stroke: 4px #fff8b7;
+    color: rgba(255,255,255,0.2);
+    text-shadow: 10px 10px 0px #0050a1,
+      15px 15px 0px #2770cf,
+      35px 35px 10px #242d32;
+      cursor: default;
 }
+
+
+  /* background-color: red; */
 
 #en0_splashDisplay{
   height: 5vh;
   line-height: 5vh;
   width: 100%;
   text-align: center;
-  color: aliceblue;
+  color: rgb(255, 230, 148);
   padding: 0px;
   font-size: 1.5vw;
   font-family: "MyFont";

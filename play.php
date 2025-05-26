@@ -157,9 +157,6 @@ if (isset($_GET["GridUpdate"]) && $viewingCode != 0) {
         $blue_used_Array = json_decode($saveUpdate->d3, true) ?: [];
         $newOpenArray = array_values(array_merge(json_decode($saveUpdate->d1, true), $red_used_Array, $blue_used_Array));
         $grey_side_Array = json_decode($saveUpdate->d1_side, true);
-        // $Ghost_open_Array = json_decode($saveUpdate->ghost_d1);
-        // if (isset($Ghost_open_Array[0])) { array_push($newOpenArray, intval($Ghost_open_Array[0])); }
-        // if (isset($Ghost_open_Array[1])) { array_push($newOpenArray, intval($Ghost_open_Array[1])); }
         $Ghost_open_Array = [];
         $Ghost_side_Array = [];
 
@@ -870,7 +867,7 @@ function draw() {
   push()
   if (player_UID_2_usrn == "ƒ") {
   fill("#ff8800");
-  text("P2[% No Player %]", 0, 32.5*windowHeight/100);
+  text("P2[% No Player %]", 0, 34*windowHeight/100);
   }
   else { 
     if(colourBlind_mode == "off") {
@@ -904,17 +901,17 @@ function draw() {
   }
     pop()
   }
-  if (Set_GameMode != 5) { text("Side Count:"+sides_display_Array.length+" ("+parseFloat((2/sides_display_Array.length*100).toFixed(2))+"%)", 0, 45*windowHeight/100); } else { text("Side Count: 0? (maybe%)" , 0, 45*windowHeight/100);}
+  if (Set_GameMode != 5) { text("Side Count:"+sides_display_Array.length+" ("+parseFloat((2/sides_display_Array.length*100).toFixed(2))+"%)", 0, 52.5*windowHeight/100); } else { text("Side Count: 0? (maybe%)" , 0, 45*windowHeight/100);}
 if (P5red_used_Array[P5red_used_Array.length-1] && Set_GameMode != 2) {
 if (colourBlind_mode == "off")
-text("Last Red:"+P5red_used_Array[P5red_used_Array.length-1], 0, 32.5*windowHeight/100)
+text("Last Red:"+P5red_used_Array[P5red_used_Array.length-1], 0, 42.5*windowHeight/100)
 if (colourBlind_mode == "protanopia")
-text("Last Yellow:"+P5red_used_Array[P5red_used_Array.length-1], 0, 32.5*windowHeight/100)
+text("Last Yellow:"+P5red_used_Array[P5red_used_Array.length-1], 0, 42.5*windowHeight/100)
 let move_shift = 0;
 }
 else {let move_shift = 0;}
 if (P5blue_used_Array[P5blue_used_Array.length-1] && Set_GameMode != 2)
-text("Last Blue:"+P5blue_used_Array[P5blue_used_Array.length-1], 0, 37*windowHeight/100)
+text("Last Blue:"+P5blue_used_Array[P5blue_used_Array.length-1], 0, 46.5*windowHeight/100)
 pop()
 
   if (set_winner_UID != -1) {
@@ -1004,7 +1001,7 @@ pop()
       RightSet_Button.attribute("value", close_match_text_ghost);
     }
   }
-  if (frameCount >= 2 && Exit_Button_1pass == "false" && SESSION_ServerLink > 0 && player_UID_2_usrn != "ƒ" && set_winner_UID == -1) {
+  if (frameCount >= 2 && Exit_Button_1pass == "false" && SESSION_ServerLink > 0 && player_UID_2_usrn != "ƒ" && set_winner_UID == -1 && (player_UID_1 == local_UID || player_UID_2 == local_UID)) {
   Exit_Button.removeAttribute("hidden");
   Exit_Button_1pass = "true";
   }
@@ -1094,8 +1091,8 @@ foreach($user_found as $row) {
 echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig getifaddr en0"))."</div>";
 //lobby code start
   if ($_SESSION["CurrentGID_Code"] == 0) {
-    echo "<div id=\"titleSplash_text\"> LUCK </div>";
-    echo "<div id=\"lobby_overlay_html\">";
+  echo "<div id=\"titleSplash_text\"> LUCK </div>";
+  echo "<div id=\"lobby_overlay_html\">";
   echo "<input id=\"join_code_input\" type=\"number\" placeholder=\"Enter Game Code\" onkeydown=\"if (event.keyCode == 13) { joinCode_entered(); return false }\" onkeypress=\"return event.charCode >= 48 && event.charCode <= 57\" min=\"0\"> </input>";
   echo "<input type=\"button\" id=\"CreateMatch_button\" hidden=\"false\" disabled=\"false\" value=\"Create Match\" onclick=\"return newMatch_Requested()\"></input>";
   echo "<input type=\"button\" id=\"JoinCode_button\" hidden=\"true\" disabled=\"true\" value=\"Join Match\" onclick=\"return joinCode_entered()\"></input>";
@@ -1108,7 +1105,7 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
     echo "<h2>Win Rate: "; if ($User_LobbyScore->save2 > 0) {echo round((intval($User_LobbyScore->save3)/intval($User_LobbyScore->save2))*100, 1)."%"; } else {echo "No Data";} echo "</h2>";
     echo "<h2>Win Streak: ".$User_LobbyScore->save4."</h2>";
     echo "<h2>Max Streak: "; if (intval($User_LobbyScore->save5) > 0) { echo $User_LobbyScore->save5; } else { echo "No Data"; } if (!isset($User_LobbyScore->save5)) { echo "Error:OOD-stat";} echo "</h2>";
-    echo "</div>";
+  echo "</div>";
 
   echo "<div class=\"leaderBoard_Lobbydisplay\" >";
   $leaderboard_Aplicants = R::findAll("user");
@@ -1151,7 +1148,30 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
     }
   }
   echo "</div>";
-
+  echo "<div id=\"currentMatches_display\">";
+  $currentMatches_pull = R::findAll("save");
+  echo "<h1>Current Matches</h1>";
+  if (count($currentMatches_pull) == 0) { echo "<br><br><br><h3>Looks Like There Isn't<br>Many Matches Maybe Make One</h3>"; }
+  foreach($currentMatches_pull as $row) {
+    echo "<script>";
+    echo "function joinCode_Button_".$row->id."() {";
+    echo "window.location.assign(\"/LUCK/play.php?reset=true&&ServerLink=".$row->id."\"".")";
+    echo "}";
+    echo "function viewCode_Button_".$row->id."() {";
+    echo "window.location.assign(\"/LUCK/play.php?ServerLink=".$row->id."\"".")";
+    echo "}";
+    echo "</script>";
+    $total_Players = isset($row->uId_2) ? 2 : 1;
+    echo "<h2>#".$row->id." Players:"; 
+    if ($total_Players == 1) { echo "<span style=\"color:rgb(0, 140, 0)\">"; }
+    else { echo "<span style=\"color:red\">"; } 
+    echo $total_Players."/2</span></h2>";
+    echo "<img id=\"joinMatch_miniButton\"";
+    if (isset($row->uId_2)) { echo "src=\"view-show.svg\" onclick=\"return viewCode_Button_".$row->id."()\" "; }
+    else { echo "src=\"join.svg\" onclick=\"return joinCode_Button_".$row->id."()\""; }
+    echo ">";
+  }
+  echo "</div>";
   echo "</div>";
   }
   //errorbanners
