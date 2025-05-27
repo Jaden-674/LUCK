@@ -700,7 +700,7 @@ pop()
 // else { tint(25, 25, 25, 80) }
 // // pixelDensity(1)
 // noSmooth()
-// image(imagetest, this.x + width / grid_shift, this.y + windowHeight / 17)
+// image(imagetest, this.x + grid_shift, this.y + windowHeight / 17)
 // pop()
 // }
 push()
@@ -731,7 +731,7 @@ noStroke()
 
 function preload() {
   font = loadFont("RobotoMono-LightItalic.ttf");
-  imagetest = loadImage("star-166.svg");
+  imagetest = loadImage("hot-icon.svg");
 }
 
 function setup() {
@@ -1084,6 +1084,9 @@ foreach($user_found as $row) {
     function rotate_Leaderboard() {
       window.location.assign("/LUCK/play.php?rotate_Leaderboard=true")
     }
+    function returnToLobbyNormal() {
+      window.location.assign("/LUCK/play.php")
+    }
   </script>
   <?php
   $match_overlay_dataPull = R::load("save", $viewingCode);
@@ -1097,17 +1100,41 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
   echo "<input type=\"button\" id=\"CreateMatch_button\" hidden=\"false\" disabled=\"false\" value=\"Create Match\" onclick=\"return newMatch_Requested()\"></input>";
   echo "<input type=\"button\" id=\"JoinCode_button\" hidden=\"true\" disabled=\"true\" value=\"Join Match\" onclick=\"return joinCode_entered()\"></input>";
 
-  echo "<div class=\"user_scoreCard_Lobbydisplay\">";
-    $User_LobbyScore = R::load("save".$_SESSION["id"], 1);
-    echo "<h1>".$_SESSION["username"]."'s Stats:</h1>";
+
+  if (isset($_GET["statView"])) {
+    $stat_UsernameID = R::findOne('user', 'username = ?', [ $_GET["statView"] ]);
+    $User_LobbyScore = R::load("save".$stat_UsernameID->id, 1);
+  }
+  else { $User_LobbyScore = R::load("save".$_SESSION["id"], 1); }
+  // if (isset($_GET["statView"])) {
+  //   // echo "<div class=\"user_scoreCard_Lobbydisplay\">";
+  //   echo "<h1"; 
+  //   if ($User_LobbyScore->name == $_SESSION["username"]) { echo " id=\"leaderboard_localBG\""; }
+  //   echo ">".$User_LobbyScore->name."'s Stats:</h1>";
+  //   echo "<h2>Matches Played: ".$User_LobbyScore->save2."</h2>";
+  //   echo "<h2>Matches Won: ".$User_LobbyScore->save3."</h2>";
+  //   echo "<h2>Win Rate: "; if ($User_LobbyScore->save2 > 0) {echo round((intval($User_LobbyScore->save3)/intval($User_LobbyScore->save2))*100, 1)."%"; } else {echo "No Data";} echo "</h2>";
+  //   echo "<h2>Win Streak: ".$User_LobbyScore->save4."</h2>";
+  //   echo "<h2>Max Streak: "; if (intval($User_LobbyScore->save5) > 0) { echo $User_LobbyScore->save5; } else { echo "No Data"; } if (!isset($User_LobbyScore->save5)) { echo "Error:OOD-stat";} echo "</h2>";
+  //   // echo "</div>";
+  // }
+
+
+  echo "<div class=\"leaderBoard_Lobbydisplay\" >";
+  if (isset($_GET["statView"])) {
+    $stat_UsernameID = R::findOne('user', 'username = ?', [ $_GET["statView"] ]);
+    $User_LobbyScore = R::load("save".$stat_UsernameID->id, 1);
+    echo "<h1"; 
+    if ($User_LobbyScore->name == $_SESSION["username"]) { echo " id=\"leaderboard_localBG\""; }
+    echo ">".$User_LobbyScore->name."'s Stats:</h1>";
     echo "<h2>Matches Played: ".$User_LobbyScore->save2."</h2>";
     echo "<h2>Matches Won: ".$User_LobbyScore->save3."</h2>";
     echo "<h2>Win Rate: "; if ($User_LobbyScore->save2 > 0) {echo round((intval($User_LobbyScore->save3)/intval($User_LobbyScore->save2))*100, 1)."%"; } else {echo "No Data";} echo "</h2>";
     echo "<h2>Win Streak: ".$User_LobbyScore->save4."</h2>";
-    echo "<h2>Max Streak: "; if (intval($User_LobbyScore->save5) > 0) { echo $User_LobbyScore->save5; } else { echo "No Data"; } if (!isset($User_LobbyScore->save5)) { echo "Error:OOD-stat";} echo "</h2>";
-  echo "</div>";
-
-  echo "<div class=\"leaderBoard_Lobbydisplay\" >";
+    echo "<h4>Max Streak: "; if (intval($User_LobbyScore->save5) > 0) { echo $User_LobbyScore->save5; } else { echo "No Data"; } if (!isset($User_LobbyScore->save5)) { echo "Error:OOD-stat";} echo "</h4>";
+    echo "<h3 id=\"stat_closeButton\" onclick=\"return returnToLobbyNormal()\">close Stats</h3>"; 
+  }
+  else {
   $leaderboard_Aplicants = R::findAll("user");
   $leaderB_usersArray = []; $leaderB_statArray = []; $leaderB_globalArray = [];
   if ($_SESSION["rotate_Leaderboard"] == 1) { $Leaderboard_pref = "save3"; }
@@ -1119,18 +1146,23 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
     array_push($leaderB_usersArray, $User_statpull->name);
     if ($_SESSION["rotate_Leaderboard"] != 2) { array_push($leaderB_statArray, $User_statpull->$Leaderboard_pref); }
     else { array_push($leaderB_statArray, round((intval($User_statpull->save3)/intval($User_statpull->save2))*100, 1)); }
+    echo "<script>";
+    echo "function viewStat_".$User_statpull->name."() {";
+    echo "window.location.assign(\"/LUCK/play.php?statView=".$User_statpull->name."\")";
+    echo "}";
+    echo "</script>";
     }
   }
   $leaderB_globalArray = array_combine($leaderB_usersArray, $leaderB_statArray);
   arsort($leaderB_globalArray);
-  echo "<h1 onclick=\"return rotate_Leaderboard()\">";
+  echo "<h1 id=\"hoverEnabled\" onclick=\"return rotate_Leaderboard()\">";
   if ($_SESSION["rotate_Leaderboard"] == 1) { echo "Wins "; }; 
   if ($_SESSION["rotate_Leaderboard"] == 2) { echo "Win% "; }; 
   if ($_SESSION["rotate_Leaderboard"] == 3) { echo "<span>Max Streak</span> "; }; 
   echo "<span>Leader Board</span></h1>";
   for ($lb_display_counter = 0; $lb_display_counter<count($leaderB_globalArray); $lb_display_counter++) {
     if (isset(array_values($leaderB_globalArray)[$lb_display_counter])) {
-      echo "<h2";
+      echo "<h2 class=\"global_lobby_hover\" onclick=\"return viewStat_".array_keys($leaderB_globalArray)[$lb_display_counter]."()\"";
       if (array_keys($leaderB_globalArray)[$lb_display_counter] == $_SESSION["username"]) {echo " id=\"leaderboard_localBG\" ";} 
       echo ">";
       if($lb_display_counter<3){ echo "<span"; }
@@ -1147,6 +1179,7 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
       echo ")</span></h2>";
     }
   }
+}
   echo "</div>";
   echo "<div id=\"currentMatches_display\">";
   $currentMatches_pull = R::findAll("save");

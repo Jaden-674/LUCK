@@ -13,9 +13,19 @@ body {
   -webkit-text-size-adjust: none;
 }
 
+:root {
+  --lobby_hover: lightblue;
+  --game_hover: lightblue;
+  --lobby_basic: #d9edff; 
+}
+
 html,
 body {
   overscroll-behavior: none;
+}
+
+.global_lobby_hover:hover {
+  background-color: var(--lobby_hover);
 }
 /* #overlay { */
   /* font-size: 20px;
@@ -103,7 +113,7 @@ body {
   line-height: 6.25vh;
   width: 25vw;
   transform: translate(37.5vw, 37.5vh);
-  background-color: #d9edff;
+  background-color: var(--lobby_basic);
   position: fixed;
   text-align: center;
   font-size: 70px;
@@ -121,7 +131,7 @@ body {
   line-height: 6.25vh;
   width: 25vw;
   transform: translate(37.5vw, 52.5vh);
-  background-color: #d9edff;
+  background-color: var(--lobby_basic);
   position: fixed; 
   text-align: center;
   z-index: 1;
@@ -142,7 +152,7 @@ input::placeholder {
 }
 
 #lobby_overlay_html input[type=button]:hover {
-  background-color: lightblue;
+  background-color: var(--lobby_hover);
 }
 
 input::-webkit-outer-spin-button,
@@ -156,7 +166,7 @@ input::-webkit-inner-spin-button {
   height: 45vh;
   width: 25vw;
   transform: translate(73.5vw, 52.5vh);
-  background-color: #d9edff;
+  background-color: var(--lobby_basic);
   position: fixed;
   text-align: center;
   z-index: 1;
@@ -170,7 +180,7 @@ input::-webkit-inner-spin-button {
 }
 
 .user_scoreCard_Lobbydisplay h1{
-  background-color: rgb(97, 115, 197);
+  /* background-color: rgb(97, 115, 197); */
   border-bottom: 1px solid #11374a;
   margin: 0vh;; 
   padding-top: 1vh;
@@ -184,11 +194,12 @@ input::-webkit-inner-spin-button {
 }
 
 .leaderBoard_Lobbydisplay {
+  margin: 0vh;
   font-family: "MyFont";
   width: 25vw;
   height: 51.25vh;
   transform: translate(1.5vw, 45.75vh);
-  background-color: #d9edff;
+  background-color: var(--lobby_basic);
   position: fixed;
   text-align: center;
   z-index: 1; 
@@ -197,6 +208,7 @@ input::-webkit-inner-spin-button {
   overscroll-behavior-y: none;
   border-radius: 10px;
   border: 0.15vw solid black;
+  padding-bottom: 0vh;
 }
 
 .leaderBoard_Lobbydisplay h1{
@@ -206,8 +218,8 @@ input::-webkit-inner-spin-button {
   padding-bottom: 1vh;
 }
 
-.leaderBoard_Lobbydisplay h1:hover{
-background-color: lightblue;
+.leaderBoard_Lobbydisplay #hoverEnabled:hover{
+background-color: var(--lobby_hover);
 cursor: pointer;
 }
 
@@ -217,9 +229,35 @@ cursor: pointer;
   padding-bottom: 1.5vh;
   border-bottom: 1px dashed black;  
 }
+.leaderBoard_Lobbydisplay h4{
+  margin: 0vh;
+  padding-top: 1.5vh;
+  padding-bottom: 1.5vh;
+  font-size: x-large;
+  /* border-bottom: 1px dashed black;   */
+}
 
 #leaderboard_localBG {
   background-color: rgb(97, 115, 197);
+}
+#leaderboard_localBG:hover {
+  background-color: rgb(154, 169, 232);
+}
+
+#stat_closeButton {
+  padding-top: 1.5vh;
+  padding-bottom: 1.5vh;
+  margin-bottom: -2vh;
+  margin-top: 0vh;
+  background-color: var(--lobby_basic);
+  color: black;
+  border-top: 1px solid black;  
+  border-bottom: 1px solid black;  
+}
+
+#stat_closeButton:hover {
+  color: white;
+  background-color: #fd3131;
 }
 
 #goldtext_LeaderBoard {
@@ -260,7 +298,7 @@ cursor: pointer;
   width: 25vw;
   height: 40vh;
   transform: translate(1.5vw, 2.5vh);
-  background-color: #d9edff;
+  background-color: var(--lobby_basic);
   position: fixed;
   text-align: center;
   z-index: 1; 
@@ -298,13 +336,13 @@ cursor: pointer;
   width: 6.25vw;
   height: 6.9vh;
   transform: translate(18.8vw, 0.075vh);
-  background-color: #d9edff;
+  background-color: var(--lobby_basic);
   border-bottom: 1px dashed black; 
   z-index: 10; 
 }
 
 #joinMatch_miniButton:hover{
-  background-color: lightblue;
+  background-color: var(--lobby_hover);
   cursor: pointer;
 }
 
@@ -313,12 +351,12 @@ cursor: pointer;
   margin-top: 85vh;
   margin-bottom: -85vh;
   transform: translate(72.5vw, -100vh);
-  background-color: #d9edff;
+  background-color: var(--lobby_basic);
   opacity: 45%;
   
 }
 #rightSet_match_button:hover {
-  background-color: lightblue;
+  background-color: var(--game_hover);
   opacity: 80%;
   cursor: pointer;
 }
@@ -327,12 +365,12 @@ cursor: pointer;
   margin-top: 85vh;
   margin-bottom: -85vh;
   transform: translate(2.5vw, -100vh);
-  background-color: #d9edff;
+  background-color: var(--lobby_basic);
   z-index: 20;
   opacity: 45%;
 }
 #leftSet_match_button:hover {
-  background-color: lightblue;
+  background-color: var(--game_hover);
   opacity: 80%;
   cursor: pointer;
 }
@@ -341,12 +379,12 @@ cursor: pointer;
   margin-top: 85vh;
   margin-bottom: -85vh;
   transform: translate(37.5vw, -100vh);
-  background-color: #d9edff;
+  background-color: var(--lobby_basic);
   opacity: 45%;
   /* font-size: 1px; */
 }
 #midSet_match_button:hover {
-  background-color: lightblue;
+  background-color: var(--game_hover);
   opacity: 80%;
   cursor: pointer;
 }
