@@ -13,6 +13,10 @@ if ($bannedCheck->banned == "true") {
 
 if (isset($_SESSION["CurrentGID_Code"])) { $viewingCode = $_SESSION["CurrentGID_Code"]; }
 if (isset($_SESSION["CurrentGID_Code"]) && $_SESSION["CurrentGID_Code"] == 0 && $_SESSION["local_totalMoves"] > 0) {  $_SESSION["local_totalMoves"] = 0; }
+if (isset($_GET["statView"])) {
+$stat_UsernameID = R::findOne('user', 'username = ?', [ $_GET["statView"] ]);
+if (!isset($stat_UsernameID)) { header("location: play.php?error=14&&invalid=".$_GET["statView"]); }
+}
 
 //if in match already
 $currentMatches_CheckArray = [];
@@ -314,20 +318,12 @@ if (isset($_GET["newServerLink"]) && $_GET["newServerLink"] == "clean") {
   }
 }
 
-if (!isset($_SESSION["rotate_Leaderboard"])) {
-  $_SESSION["rotate_Leaderboard"] = 1; 
-  }
+if (!isset($_SESSION["rotate_Leaderboard"])) { $_SESSION["rotate_Leaderboard"] = 1; }
 if (isset($_GET["rotate_Leaderboard"])){
-  if ($_SESSION["rotate_Leaderboard"] >= 3) {
-    $_SESSION["rotate_Leaderboard"] = 1;
-  }
-  else {
-    $_SESSION["rotate_Leaderboard"] = $_SESSION["rotate_Leaderboard"]+1;
-  }
+  if ($_SESSION["rotate_Leaderboard"] >= 3) { $_SESSION["rotate_Leaderboard"] = 1; }
+  else { $_SESSION["rotate_Leaderboard"] = $_SESSION["rotate_Leaderboard"]+1; }
   header("location: play.php");
 }
-// $_SESSION["rotate_Leaderboard"]=1;
-// echo $_SESSION["rotate_Leaderboard"];
 
 //reset match and join match if avalible
 if (isset($_GET["reset"])){
@@ -732,9 +728,13 @@ noStroke()
 function preload() {
   font = loadFont("RobotoMono-LightItalic.ttf");
   imagetest = loadImage("hot-icon.svg");
+
 }
 
 function setup() {
+  let nametest = "working";
+  let numeber = 3;
+  console.log(nametest+numeber);
   createCanvas(windowWidth, windowHeight);
   tileSize = windowHeight / 17;  
   let SESSION_ServerLink_setup = <?php echo $_SESSION["CurrentGID_Code"];?>;
@@ -1100,29 +1100,9 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
   echo "<input type=\"button\" id=\"CreateMatch_button\" hidden=\"false\" disabled=\"false\" value=\"Create Match\" onclick=\"return newMatch_Requested()\"></input>";
   echo "<input type=\"button\" id=\"JoinCode_button\" hidden=\"true\" disabled=\"true\" value=\"Join Match\" onclick=\"return joinCode_entered()\"></input>";
 
-
-  if (isset($_GET["statView"])) {
-    $stat_UsernameID = R::findOne('user', 'username = ?', [ $_GET["statView"] ]);
-    $User_LobbyScore = R::load("save".$stat_UsernameID->id, 1);
-  }
-  else { $User_LobbyScore = R::load("save".$_SESSION["id"], 1); }
-  // if (isset($_GET["statView"])) {
-  //   // echo "<div class=\"user_scoreCard_Lobbydisplay\">";
-  //   echo "<h1"; 
-  //   if ($User_LobbyScore->name == $_SESSION["username"]) { echo " id=\"leaderboard_localBG\""; }
-  //   echo ">".$User_LobbyScore->name."'s Stats:</h1>";
-  //   echo "<h2>Matches Played: ".$User_LobbyScore->save2."</h2>";
-  //   echo "<h2>Matches Won: ".$User_LobbyScore->save3."</h2>";
-  //   echo "<h2>Win Rate: "; if ($User_LobbyScore->save2 > 0) {echo round((intval($User_LobbyScore->save3)/intval($User_LobbyScore->save2))*100, 1)."%"; } else {echo "No Data";} echo "</h2>";
-  //   echo "<h2>Win Streak: ".$User_LobbyScore->save4."</h2>";
-  //   echo "<h2>Max Streak: "; if (intval($User_LobbyScore->save5) > 0) { echo $User_LobbyScore->save5; } else { echo "No Data"; } if (!isset($User_LobbyScore->save5)) { echo "Error:OOD-stat";} echo "</h2>";
-  //   // echo "</div>";
-  // }
-
-
+  //leadeboard
   echo "<div class=\"leaderBoard_Lobbydisplay\" >";
   if (isset($_GET["statView"])) {
-    $stat_UsernameID = R::findOne('user', 'username = ?', [ $_GET["statView"] ]);
     $User_LobbyScore = R::load("save".$stat_UsernameID->id, 1);
     echo "<h1"; 
     if ($User_LobbyScore->name == $_SESSION["username"]) { echo " id=\"leaderboard_localBG\""; }
@@ -1181,6 +1161,7 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
   }
 }
   echo "</div>";
+  // current matches
   echo "<div id=\"currentMatches_display\">";
   $currentMatches_pull = R::findAll("save");
   echo "<h1>Current Matches</h1>";
@@ -1222,6 +1203,9 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
   }
   if (isset($_GET["error"]) && $_GET["error"] == 13) {
     echo "<div id=\"errorTab\">Match Spectating was Canceled</div>";
+  }
+  if (isset($_GET["error"]) && $_GET["error"] == 14 && isset($_GET["invalid"]))  {
+    echo "<div id=\"errorTab\">Player \"".$_GET["invalid"]."\" Cannot Be Found</div>";
   }
 ?>
 <script> 

@@ -49,6 +49,7 @@ body {
   z-index: 10;
   color: #283740;
   transition: 0.3s;
+  transition-delay: 0.24s;
   text-overflow: clip;
   white-space: nowrap;
   margin-left: -0.1vw;
@@ -297,7 +298,7 @@ cursor: pointer;
   font-family: "MyFont";
   width: 25vw;
   height: 40vh;
-  transform: translate(1.5vw, 2.5vh);
+  transform: translate(73.5vw, 52.5vh);
   background-color: var(--lobby_basic);
   position: fixed;
   text-align: center;
