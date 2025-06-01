@@ -14,7 +14,7 @@ body {
 }
 
 :root {
-  --lobby_hover: lightblue;
+  --lobby_hover: lightgoldenrodyellow;
   --game_hover: lightblue;
   --lobby_basic: #d9edff; 
 }

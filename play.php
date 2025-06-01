@@ -78,8 +78,8 @@ if($_SESSION["CurrentGID_Code"] != 0) {
   $fetch_response_S = ["d1" => [], "d1_side" => [],"Gd_C" => [], "currentColour" => [], "turn_id" => [], "closedWinner_UID" => [], "total_movesSync" => []];
   if ($item->turn_open == "blue") { $fetch_response_S["Gd_C"] = $decodedD2[count($decodedD2)-1]; }
   if ($item->turn_open == "red") { $fetch_response_S["Gd_C"] = $decodedD3[count($decodedD3)-1]; }
-  if (is_array($decodedD1)) { $fetch_response_S["d1"] = array_merge($fetch_response_S["d1"], $decodedD1); }
-  if ($item->game_mode != 2) { $fetch_response_S["d1_side"] = array_merge($fetch_response_S["d1_side"], $decodedD1_side); }
+  $fetch_response_S["d1"] = json_decode($item->ghost_d1);
+  $fetch_response_S["d1_side"] = json_decode($item->ghost_d1_side);
   $fetch_response_S["currentColour"] = $item->turn_open;
   $fetch_response_S["turn_id"] = json_decode($item->turn_id);
   $fetch_response_S["closedWinner_UID"] = json_decode($item->winner_uid);
@@ -90,6 +90,10 @@ if($_SESSION["CurrentGID_Code"] != 0) {
   //FindingPlayer
   $Find_player_response = ["playerB" => []];
   $Find_player_response["playerB"] = json_decode($item->uID_2);
+  //ColourDeSync_reset
+  $ColourDeSync_response = ["RedSync" => [], "BlueSync" => []];
+  $ColourDeSync_response["RedSync"] = json_decode($item->d2);
+  $ColourDeSync_response["BlueSync"] = json_decode($item->d3);
 }
 else { $fetch_response_L = []; }
 if (isset($_GET['fetch_data'])) {
@@ -104,6 +108,10 @@ if (isset($_GET['check_data'])) {
 }
 if (isset($_GET["FindingPlayer_data"])) {
   echo json_encode($Find_player_response);
+  exit;
+}
+if (isset($_GET["ColourDeSync_reset"])) {
+  echo json_encode($ColourDeSync_response);
   exit;
 }
 
@@ -504,6 +512,8 @@ let player_UID_2_usrn = "ƒ";
 let set_winner_UID = -1;
 let set_winning_array = [];
 let sides_display_Array = [];
+let sides_display_Sm_Array = [];
+let open_choices_Sm_Array = [];
 let win_timeframe = 0;
 let Set_GameMode = 1;
 let client_totalMoves = -1;
@@ -511,7 +521,6 @@ let local_UID = <?php echo intval($_SESSION["id"]);?>;
 let First_LargePacket_set = "false";
 
 function checkData() {
-  // fetchData("Large");
   if (player_UID_2_usrn == "ƒ") {
     fetch(window.location.href + '?FindingPlayer_data')
     .then(check_response => check_response.json())
@@ -527,6 +536,23 @@ function checkData() {
     })
   }
   if ((turn_id_current != local_UID || set_winner_UID != -1) && player_UID_2_usrn != "ƒ") {
+    if ((P5red_used_Array.length - P5blue_used_Array.length) > 1 || (P5blue_used_Array.length - P5red_used_Array.length) > 1) {
+      fetch(window.location.href + '?ColourDeSync_reset') 
+      .then(check_response => check_response.json())
+      .then(data => {
+        if (data == null && set_winner_UID == -1) { window.location.assign("/LUCK/play.php?error=12.1");}
+        else if (data == null && local_UID != player_UID_1 && local_UID != player_UID_2 ) { window.location.assign("/LUCK/play.php?error=13"); }
+        P5red_used_Array = data.RedSync;
+        P5blue_used_Array = data.BlueSync;
+          for(let k_red2 = 0; k_red2<P5red_used_Array.length; k_red2++) {
+      grid[P5red_used_Array[k_red2]].type = "red";
+    }
+      for(let k_blue2 = 0; k_blue2<P5blue_used_Array.length; k_blue2++) {
+      grid[P5blue_used_Array[k_blue2]].type = "blue";
+    }
+      })
+    } 
+    else {
     fetch(window.location.href + '?check_data')
     .then(check_response => check_response.json())
     .then(data => {
@@ -539,7 +565,8 @@ function checkData() {
         fetchData("Small");
       }
     })
-  }
+  } 
+}
 }
 
   function fetchData(queryType) {
@@ -576,30 +603,7 @@ function checkData() {
         for (let u = 0; u<225; u++) {
           grid[u].type = "disabled";
         }
-      }
-      if (queryType == "Small") {
-        if(data == null) { window.location.assign("/LUCK/play.php?error=11"); }
-        client_totalMoves = parseInt(data.total_movesSync)+1;
-        if (data.currentColour == "blue") { P5red_used_Array.push(data.Gd_C); }
-        if (data.currentColour == "red") { P5blue_used_Array.push(data.Gd_C); }
-        colourRelay = data.currentColour;
-        open_choices_Array = data.d1;
-        sides_display_Array = data.d1_side;
-        turn_id_current = parseInt(data.turn_id);
-        if (data.turn_id == null) turn_id_current_ursn = "ƒ";
-        else { turn_id_current_ursn = data.turn_id[1]; }
-        set_winner_UID = parseInt(data.closedWinner_UID[0]);
-        if (data.closedWinner_UID.length == 5) {
-        Exit_Button.attribute("hidden", "true");
-        set_winning_array = JSON.parse(data.closedWinner_UID[1]);
-        win_timeframe = data.closedWinner_UID[3];
-        if (data.currentColour == "red") { P5red_used_Array.push(data.closedWinner_UID[4]); }
-        if (data.currentColour == "blue") { P5blue_used_Array.push(data.closedWinner_UID[4]); }
-        }
-        else { set_winning_array = ["win_array_error"]; }
-        win_splash_random = parseInt(data.closedWinner_UID[2]);
-      }   
-  if ( Set_GameMode != 2 ) {
+        if ( Set_GameMode != 2 ) {
     for (let sides_counter = 0; sides_counter<sides_display_Array.length; sides_counter++) {
     grid[sides_display_Array[sides_counter]].type = "side";
   }
@@ -613,10 +617,47 @@ function checkData() {
     for(let k_blue2 = 0; k_blue2<P5blue_used_Array.length; k_blue2++) {
     grid[P5blue_used_Array[k_blue2]].type = "blue";
   }
+      }
+      if (queryType == "Small") {
+        if(data == null) { window.location.assign("/LUCK/play.php?error=11"); }
+        client_totalMoves = parseInt(data.total_movesSync)+1;
+        colourRelay = data.currentColour;
+        open_choices_Sm_Array = data.d1;
+        sides_display_Sm_Array = data.d1_side;
+        turn_id_current = parseInt(data.turn_id);
+        if (data.turn_id == null) turn_id_current_ursn = "ƒ";
+        else { turn_id_current_ursn = data.turn_id[1]; }
+        set_winner_UID = parseInt(data.closedWinner_UID[0]);
+        if (data.closedWinner_UID.length == 5) {
+        Exit_Button.attribute("hidden", "true");
+        set_winning_array = JSON.parse(data.closedWinner_UID[1]);
+        win_timeframe = data.closedWinner_UID[3];
+        if (data.currentColour == "red") { P5red_used_Array.push(data.closedWinner_UID[4]); }
+        if (data.currentColour == "blue") { P5blue_used_Array.push(data.closedWinner_UID[4]); }
+        }
+        else { set_winning_array = ["win_array_error"]; }
+        win_splash_random = parseInt(data.closedWinner_UID[2]);
+        if ( Set_GameMode != 2 ) {
+    for (let sides_counter_Sm = 0; sides_counter_Sm<sides_display_Sm_Array.length; sides_counter_Sm++) {
+    grid[sides_display_Sm_Array[sides_counter_Sm]].type = "side";
+  }
+  }
+    for(let k2_Sm = 0; k2_Sm<open_choices_Sm_Array.length; k2_Sm++) {
+    grid[open_choices_Sm_Array[k2_Sm]].type = "open";
+  }
+  if (data.currentColour == "blue") { 
+    grid[data.Gd_C].type = "red"; 
+    P5red_used_Array.push(data.Gd_C);
+  }
+  else { 
+    grid[data.Gd_C].type = "blue"; 
+    P5blue_used_Array.push(data.Gd_C);
+  }
+      }   
     })
 }
 // lets for values
-let grid = []
+let grid = [];
 let tileSize;
 let gridSize = 15
 let all_sides = []
@@ -690,15 +731,15 @@ class Square {
           pop()
         }
 pop()
-// if (this.type == "red" || this.type == "blue") {
-// push()
-// if (colourBlind_mode == "off" ) { tint(225, 225, 225, 80); }
+//  if (this.type == "red") {
+//  push()
+//  if (colourBlind_mode == "off" ) { tint(225, 225, 225, 80); }
 // else { tint(25, 25, 25, 80) }
-// // pixelDensity(1)
-// noSmooth()
-// image(imagetest, this.x + grid_shift, this.y + windowHeight / 17)
-// pop()
-// }
+//  // pixelDensity(1)
+//  noSmooth()
+//  image(imagetest, this.x + grid_shift, this.y + windowHeight / 17)
+//  pop()
+//  }
 push()
 noStroke()
     textFont(font);
@@ -732,9 +773,6 @@ function preload() {
 }
 
 function setup() {
-  let nametest = "working";
-  let numeber = 3;
-  console.log(nametest+numeber);
   createCanvas(windowWidth, windowHeight);
   tileSize = windowHeight / 17;  
   let SESSION_ServerLink_setup = <?php echo $_SESSION["CurrentGID_Code"];?>;
