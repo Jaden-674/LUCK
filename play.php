@@ -433,9 +433,8 @@ if(isset($_GET["id"]) && $_GET["id"] == "SaveNewUser") {
     R::store($save_personal);
     $_SESSION["CurrentGID_Code"] = 0;
   }
-  header("location: play.php");    
-}
-
+    header("location: login.php");  
+  }
 // login
 if((isset($_GET["id"]) && $_GET["id"] == "loginCheck" )|| !isset($_SESSION["username"])){
     $username = $_POST["username"];
@@ -639,7 +638,10 @@ function checkData() {
         win_splash_random = parseInt(data.closedWinner_UID[2]);
         if ( Set_GameMode != 2 ) {
     for (let sides_counter_Sm = 0; sides_counter_Sm<sides_display_Sm_Array.length; sides_counter_Sm++) {
+    // if (!sides_display_Array.includes(sides_display_Sm_Array[sides_counter_Sm])) {
     grid[sides_display_Sm_Array[sides_counter_Sm]].type = "side";
+    sides_display_Array.push(sides_display_Sm_Array[sides_counter_Sm]);
+    // }
   }
   }
     for(let k2_Sm = 0; k2_Sm<open_choices_Sm_Array.length; k2_Sm++) {
@@ -769,7 +771,6 @@ noStroke()
 function preload() {
   font = loadFont("RobotoMono-LightItalic.ttf");
   imagetest = loadImage("hot-icon.svg");
-
 }
 
 function setup() {
@@ -813,7 +814,6 @@ function setup() {
   Exit_Button.attribute("id", "exit_match_button");
   Exit_Button.attribute("onclick", "return CloseMatch_Request()");
   
-  
   imagetest.resize(windowHeight / 17, windowHeight / 17)
 }
 
@@ -855,13 +855,14 @@ function checklocation(base) {
       if (colourRelay == "blue") { P5red_used_Array.push(base); }
       else { P5blue_used_Array.push(base); }
       open_choices_Array = data.d1;
-      sides_display_Array = data.d1_side;
+      sides_ClickResponse_Array = data.d1_side;
       turn_id_current = data.turn_id[0]; 
       turn_id_current_ursn = data.turn_id[1];
       client_totalMoves = parseInt(data.T_M)+1;
       if ( Set_GameMode != 2 ) {
-        for (let sides_counter = 0; sides_counter<sides_display_Array.length; sides_counter++) {
-          grid[sides_display_Array[sides_counter]].type = "side";
+        for (let sides_counter = 0; sides_counter<sides_ClickResponse_Array.length; sides_counter++) {
+          grid[sides_ClickResponse_Array[sides_counter]].type = "side";
+          sides_display_Array.push(parseInt(sides_ClickResponse_Array[sides_counter]));
         }
       }
         for(let k2 = 0; k2<open_choices_Array.length; k2++) {
@@ -878,7 +879,7 @@ function draw() {
     if (set_winner_UID != -1) {
     push()
     fill(180, 180, 180, 100)
-    rect(0, 0, windowWidth, windowHeight)
+    rect(0, 0, width, height)
     pop()
   }
 
@@ -1225,6 +1226,11 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
   }
   echo "</div>";
   echo "</div>";
+
+  echo "<div id=\"reload_button_wrap\">";
+  echo "<img id=\"reload_page_button\" src=\"refresh-sync-reload-1.svg\" onclick=\"return returnToLobbyNormal()\">";
+  echo "</div>";
+
   }
   //errorbanners
   if (isset($_GET["invalid"]) && isset($_GET["error"]) && $_GET["error"] == 10) {

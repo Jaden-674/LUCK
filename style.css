@@ -487,3 +487,25 @@ width: 0px;
 #exit_match_button:hover {
   background-color: rgb(255, 45, 45);
 }
+
+#reload_page_button {
+  width: 10vh;
+  height: 10vh;
+  margin-bottom: -10vh;
+background-color: var(--lobby_basic);
+border-radius: 50px;
+border: 0.15vw solid black;
+transition: transform 1s;
+}
+
+#reload_button_wrap {
+  width: 10vh;
+height: 10vh;
+margin-bottom: -10vh;
+  transform: translate(92.5vw, 40vh);
+}
+
+#reload_button_wrap #reload_page_button:hover {
+  background-color: var(--lobby_hover);
+  transform: rotate(360deg);
+} 
