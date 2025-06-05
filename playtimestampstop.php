@@ -13,26 +13,26 @@ foreach ($findall_currentMatches as $row) {
   } 
 }
 if (intval(count($currentMatches_CheckArray)) != 0 && isset($_GET["ServerLink"]) && $_GET["ServerLink"] != $currentMatches_CheckArray[0]){
-  header("location: play.php?ServerLink=".$currentMatches_CheckArray[0]);
+  header("location: playtimestampstop.php?ServerLink=".$currentMatches_CheckArray[0]);
   exit;
 }
 //server request GID change valid
 if (isset($_GET["ServerLink"]) && (R::findOne('save', 'id = ?', [ $_GET["ServerLink"] ]) != null || $_GET["ServerLink"] == 0)) {
   $viewingCode = $_GET["ServerLink"]; 
   $_SESSION["CurrentGID_Code"] = $_GET["ServerLink"];
-  header("location: play.php");
+  header("location: playtimestampstop.php");
 }
 //server request GID chnage invalid
 else if (isset($_GET["ServerLink"]) && R::findOne('save', 'id = ?', [ $_GET["ServerLink"] ]) == null)  {
   $viewingCode = 0;
   $_SESSION["CurrentGID_Code"] = 0;
-  header("location: play.php?error=10&&invalid=".$_GET["ServerLink"]);
+  header("location: playtimestampstop.php?error=10&&invalid=".$_GET["ServerLink"]);
   exit;
 }
 if (R::findOne('save', 'id = ?', [ $_SESSION["CurrentGID_Code"] ]) == null && $_SESSION["CurrentGID_Code"] != 0) {
   $viewingCode = 0;
   $_SESSION["CurrentGID_Code"] = 0;
-  header("location: play.php?error=11");
+  header("location: playtimestampstop.php?error=11");
   exit;
 }
 
@@ -75,7 +75,7 @@ if (isset($_GET["match_destroy"]) && $_GET["match_destroy"] == "true") {
     R::trash($matchDestroy);
     $_SESSION["CurrentGID_Code"] = 0;
   }
-  header("location: play.php");
+  header("location: playtimestampstop.php");
 }
 
 if (isset($_GET["newServerLink"]) && $_GET["newServerLink"] == "clean") {
@@ -98,10 +98,10 @@ if (isset($_GET["newServerLink"]) && $_GET["newServerLink"] == "clean") {
   $createNewMatch->wins_counter = json_encode([0, 0]);
   $_SESSION["CurrentGID_Code"] = $createNewMatch->id;
   R::store($createNewMatch);
-  header("location: play.php?ServerLink=".$createNewMatch->id);
+  header("location: playtimestampstop.php?ServerLink=".$createNewMatch->id);
   }
   else {
-    header("location: play.php?ServerLink=".$foundSessionMatches[0]);
+    header("location: playtimestampstop.php?ServerLink=".$foundSessionMatches[0]);
   }
 }
 
@@ -155,12 +155,12 @@ if (isset($_GET["reset"])){
       $userUpdatereset->wins_counter = json_encode([0, 0]);   
       }
         R::store($userUpdatereset);
-      header("location: play.php");
+      header("location: playtimestampstop.php");
 }
 
-//player update server with play, including win and validation for both
-// localhost/LUCK/play.php?GridUpdate=win&&ClickBase=153&&Check1=139&&Check2=125&&Check3=111&&Check4=97&&TurnColour=blue
-// localhost/LUCK/play.php?Locked=***&&GridUpdate=red
+//player update server with playtimestampstop, including win and validation for both
+// localhost/LUCK/playtimestampstop.php?GridUpdate=win&&ClickBase=153&&Check1=139&&Check2=125&&Check3=111&&Check4=97&&TurnColour=blue
+// localhost/LUCK/playtimestampstop.php?Locked=***&&GridUpdate=red
 if (isset($_GET["GridUpdate"]) && $viewingCode != 0) {
   if ($_GET["GridUpdate"] == "win") {
     $winUpdate = R::load("save", $viewingCode);
@@ -244,7 +244,7 @@ if (isset($_GET["GridUpdate"]) && $viewingCode != 0) {
     }
     R::store($saveUpdate);
   }
-  header("location: play.php");
+  header("location: playtimestampstop.php");
   exit;
 }
 
@@ -255,7 +255,7 @@ if (isset($_GET["protanopiaToggle"])) {
     }
     else {$userUpdatePROtoggle->save1 = "protanopia";}
     R::store($userUpdatePROtoggle);
-    header("location: play.php");
+    header("location: playtimestampstop.php");
 
   }
 
@@ -301,7 +301,7 @@ if(isset($_GET["id"]) && $_GET["id"] == "SaveNewUser") {
     R::store($save_personal);
     $_SESSION["CurrentGID_Code"] = 0;
   }
-  header("location: play.php");    
+  header("location: playtimestampstop.php");    
 }
 
 if((isset($_GET["id"]) && $_GET["id"] == "loginCheck" )|| !isset($_SESSION["username"])){
@@ -320,7 +320,7 @@ else{
         $_SESSION["accountlevel"] = $user->accountlevel;
         $_SESSION["id"] = $user->id;
         $_SESSION["CurrentGID_Code"] = 0;
-        header("location: play.php");
+        header("location: playtimestampstop.php");
     }
 }
 }
@@ -341,7 +341,7 @@ $ip = trim(shell_exec("ipconfig getifaddr en0"));
 ?>
 <html style="background: #21323b">
 <head>
-    <title>LUCK/play</title>
+    <title>LUCK/playtimestampstop</title>
     <link rel="stylesheet" href="style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
@@ -404,7 +404,7 @@ let sides_display_Array = [];
         if (data.turn_id == null) turn_id_current_ursn = "ƒ";
         else { turn_id_current_ursn = data.turn_id[1]; }
 
-        if (data.playerA == null) {window.location.assign("/LUCK/play.php?error=12");}
+        if (data.playerA == null) {window.location.assign("/LUCK/playtimestampstop.php?error=12");}
         player_UID_1_usrn = data.playerA[1];
         if (data.playerB != null) { player_UID_2_usrn = data.playerB[1]; }
         if (player_UID_1_usrn == null) player_UID_1_usrn = "ƒ";
@@ -573,11 +573,11 @@ function checklocation(base) {
   for (let check_PositionND_positive = 1; check_PositionND_positive<5;) { if((base+(16*check_PositionND_positive))%15 != 0 && base+(16*check_PositionND_positive) <= 224 && grid[base].type == grid[base+(16*check_PositionND_positive)].type) {check_lineND.push(grid[base+(16*check_PositionND_positive)].id);check_PositionND_positive++;} else{check_PositionND_positive=16} }
   for (let check_PositionPD_negative = 1; check_PositionPD_negative<5;) { if((base-(14*check_PositionPD_negative))%15 != 0 && base-(14*check_PositionPD_negative) >= 0 && grid[base].type == grid[base-(14*check_PositionPD_negative)].type) {check_linePD.push(grid[base-(14*check_PositionPD_negative)].id);check_PositionPD_negative++;} else{check_PositionPD_negative=16} }
   for (let check_PositionPD_positive = 1; check_PositionPD_positive<5;) { if((base+(14*check_PositionPD_positive))%15 != 14 && base+(14*check_PositionPD_positive) <= 224 && grid[base].type == grid[base+(14*check_PositionPD_positive)].type) {check_linePD.push(grid[base+(14*check_PositionPD_positive)].id);check_PositionPD_positive++;} else{check_PositionPD_positive=16} }
-  if (check_lineX.length>=4) {location.href = "play.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_lineX[0]+"&&Check2="+check_lineX[1]+"&&Check3="+check_lineX[2]+"&&Check4="+check_lineX[3]+"&&TurnColour="+turn_colour_ghost; }
-  if (check_lineY.length>=4) {location.href = "play.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_lineY[0]+"&&Check2="+check_lineY[1]+"&&Check3="+check_lineY[2]+"&&Check4="+check_lineY[3]+"&&TurnColour="+turn_colour_ghost; }
-  if (check_lineND.length>=4) {location.href = "play.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_lineND[0]+"&&Check2="+check_lineND[1]+"&&Check3="+check_lineND[2]+"&&Check4="+check_lineND[3]+"&&TurnColour="+turn_colour_ghost; }
-  if (check_linePD.length>=4) {location.href = "play.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_linePD[0]+"&&Check2="+check_linePD[1]+"&&Check3="+check_linePD[2]+"&&Check4="+check_linePD[3]+"&&TurnColour="+turn_colour_ghost; }
-  if (check_lineX.length<4 && check_lineY.length<4 && check_lineND.length<4 && check_linePD.length<4) {location.href = "play.php?Locked="+localSelected_OpenPosID+"&&GridUpdate="+turn_colour_ghost;}
+  if (check_lineX.length>=4) {location.href = "playtimestampstop.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_lineX[0]+"&&Check2="+check_lineX[1]+"&&Check3="+check_lineX[2]+"&&Check4="+check_lineX[3]+"&&TurnColour="+turn_colour_ghost; }
+  if (check_lineY.length>=4) {location.href = "playtimestampstop.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_lineY[0]+"&&Check2="+check_lineY[1]+"&&Check3="+check_lineY[2]+"&&Check4="+check_lineY[3]+"&&TurnColour="+turn_colour_ghost; }
+  if (check_lineND.length>=4) {location.href = "playtimestampstop.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_lineND[0]+"&&Check2="+check_lineND[1]+"&&Check3="+check_lineND[2]+"&&Check4="+check_lineND[3]+"&&TurnColour="+turn_colour_ghost; }
+  if (check_linePD.length>=4) {location.href = "playtimestampstop.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_linePD[0]+"&&Check2="+check_linePD[1]+"&&Check3="+check_linePD[2]+"&&Check4="+check_linePD[3]+"&&TurnColour="+turn_colour_ghost; }
+  if (check_lineX.length<4 && check_lineY.length<4 && check_lineND.length<4 && check_linePD.length<4) {location.href = "playtimestampstop.php?Locked="+localSelected_OpenPosID+"&&GridUpdate="+turn_colour_ghost;}
   }
 }
 
@@ -674,7 +674,7 @@ pop()
         <?php
 echo "<script>";
 echo "function myFunction() {";
-echo "navigator.clipboard.writeText('http://".strval($ip)."/LUCK/play.php?ServerLink=".strval($_SESSION['CurrentGID_Code'])."')";
+echo "navigator.clipboard.writeText('http://".strval($ip)."/LUCK/playtimestampstop.php?ServerLink=".strval($_SESSION['CurrentGID_Code'])."')";
 echo "}";
 echo "</script>";
 
@@ -700,7 +700,7 @@ foreach($user_found as $row) {
   echo "</div>";
 ?>
         <a href="logout.php">logout</a><br>
-        <a href="play.php?protanopiaToggle=true">Protanopia</a><br>
+        <a href="playtimestampstop.php?protanopiaToggle=true">Protanopia</a><br>
 <br>
 <div class="sidebar_tabs">
 <a>Game Settings:</a><br>
@@ -711,28 +711,28 @@ foreach($user_found as $row) {
 
     $userUpdatepppp = R::load("save", $viewingCode);
     if ($_SESSION["CurrentGID_Code"] != 0) {
-      echo "<a href=\"play.php?reset=true\">reset/join match</a><br>";
-      if ((intval($_SESSION["id"]) != json_decode($userUpdatepppp->uID_1)[0] && intval($_SESSION["id"]) != json_decode($userUpdatepppp->uID_2)[0])) { echo "<a href=\"play.php?ServerLink=0\">Return to lobby</a><br>"; }
+      echo "<a href=\"playtimestampstop.php?reset=true\">reset/join match</a><br>";
+      if ((intval($_SESSION["id"]) != json_decode($userUpdatepppp->uID_1)[0] && intval($_SESSION["id"]) != json_decode($userUpdatepppp->uID_2)[0])) { echo "<a href=\"playtimestampstop.php?ServerLink=0\">Return to lobby</a><br>"; }
       }
     if (intval($_SESSION["id"]) == json_decode($userUpdatepppp->uID_1)[0] || intval($_SESSION["id"]) == json_decode($userUpdatepppp->uID_2)[0]){ 
-      echo "<a href=\"play.php?match_destroy=true\">Close Match</a>";
+      echo "<a href=\"playtimestampstop.php?match_destroy=true\">Close Match</a>";
       echo "<br><br><input type=\"button\" value=\"Copy Game Link\" onClick=\"return myFunction()\">";
     }
     else {
-      echo "<a href=\"play.php?newServerLink=clean\">Create fresh Match</a>";
+      echo "<a href=\"playtimestampstop.php?newServerLink=clean\">Create fresh Match</a>";
     }
 ?>
   </div>
   <!--html game overlay code start -->
   <script>
     function joinCode_entered() { 
-      window.location.assign("/LUCK/play.php?reset=true&&ServerLink="+document.getElementById("join_code_input").value); 
+      window.location.assign("/LUCK/playtimestampstop.php?reset=true&&ServerLink="+document.getElementById("join_code_input").value); 
     }
     function newMatch_Requested() { 
-      window.location.assign("/LUCK/play.php?newServerLink=clean"); 
+      window.location.assign("/LUCK/playtimestampstop.php?newServerLink=clean"); 
     }
     function ChangeToLocalMatch() { 
-      window.location.assign("/LUCK/play.php?reset=true"); 
+      window.location.assign("/LUCK/playtimestampstop.php?reset=true"); 
     }
   </script>
   <?php
@@ -767,21 +767,6 @@ foreach($user_found as $row) {
     echo "</div>";
   echo "</div>";
   }
-  // if (isset($_GET["invalid"]) && isset($_GET["error"])) {
-  //   echo "<a id=\"testing_join_code\"> Match Not Found: {".$_GET["invalid"]."}</a>";
-  // }
-        ?>
-
-        <!-- <script>
-          setInterval(displayHello, 1000);
-          displayHello()
-          function displayHello() {
-            let winnerUID = <?php // if (json_decode($match_overlay_dataPull->winner_UID) >= 1 && json_decode($match_overlay_dataPull->winner_UID) != null)  { echo $match_overlay_dataPull->winner_UID; } else { echo "errorINT"; } ?>;
-            <?php // $match_overlay_dataPull = $match_overlay_dataPull->fresh();?>
-            let veribletest2222 = winnerUID[3]; // 4th element of the array
-            if (winnerUID[3] -  Math.round(Date.now() / 1000) >= 1 ) { document.getElementById("PreMatch_Requests222").value = veribletest2222 - Math.round(Date.now() / 1000); } 
-            else { document.getElementById("PreMatch_Requests222").value = "open"; }
-          }
-        </script>   -->
+  ?>
 </body>
 </html>

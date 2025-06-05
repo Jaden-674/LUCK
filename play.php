@@ -10,6 +10,9 @@ if ($bannedCheck->banned == "true") {
     exit;
   }
 }
+else {
+  header("location: login.php");
+}
 
 if (isset($_SESSION["CurrentGID_Code"])) { $viewingCode = $_SESSION["CurrentGID_Code"]; }
 if (isset($_SESSION["CurrentGID_Code"]) && $_SESSION["CurrentGID_Code"] == 0 && $_SESSION["local_totalMoves"] > 0) {  $_SESSION["local_totalMoves"] = 0; }
@@ -219,11 +222,25 @@ if (isset($_GET["GridUpdate"]) && $viewingCode != 0) {
         $saveUpdate->d3 = json_encode($blue_used_Array);
         $saveUpdate->total_moves = intval($saveUpdate->total_moves)+1; 
         $saveUpdate->d1_side = json_encode(array_values(array_diff($grey_side_Array, $newOpenArray)));
-        $saveUpdate->turnOpen = ($_GET["GridUpdate"] == "red") ? "blue" : "red";
         $saveUpdate->ghost_d1 = json_encode($Ghost_open_Array);
         $saveUpdate->ghost_d1_side = json_encode($Ghost_side_Array);
+        if ($saveUpdate->game_mode == 6) {
+          $randomTurn = rand(1,2);
+          $saveUpdate->Gd_c = $_GET["locked"];
+          if ($randomTurn == 1) {
+            $saveUpdate->turn_id = $saveUpdate->uID_1;
+            $saveUpdate->turnOpen = "blue";
+          }
+          else {
+            $saveUpdate->turn_id = $saveUpdate->uID_2;
+            $saveUpdate->turnOpen = "red";
+          }
+        }
+        else {
+          $saveUpdate->turnOpen = ($_GET["GridUpdate"] == "red") ? "blue" : "red";
         if ($saveUpdate->turn_id == $saveUpdate->uID_1) { $saveUpdate->turn_id = $saveUpdate->uID_2; }
         else { $saveUpdate->turn_id = $saveUpdate->uID_1; }
+        }
       }
     R::store($saveUpdate);
   }
@@ -269,7 +286,7 @@ if (isset($_GET["match_destroy"]) && $_GET["match_destroy"] == "true") {
 
 if (isset($_GET["SwitchGameMode"]) && $_GET["SwitchGameMode"] == true) {
   $SwitchGM = R::load("save", $viewingCode);
-  $gamemodes_total = 5;
+  $gamemodes_total = 6;
   if (isset($_SESSION["id"]) && $_SESSION["id"] == json_decode($SwitchGM->uID_1)[0] && json_decode($SwitchGM->uID_2)[0] == null) {
     if ($SwitchGM->game_mode == 3) { $SwitchGM->d1_side = json_encode([81,82,83,95,99,110,114,125,129,141,142,143]); }
     if ($SwitchGM->game_mode == 5) { $SwitchGM->d1 = json_encode([96, 97, 98, 111, 112, 113, 126, 127, 128]); }
@@ -459,6 +476,8 @@ else{
 
 $added_users_all = R::load('save'.$_SESSION["id"], 1);
 $colourPreset_p5relay = $added_users_all->save1;
+// echo $_SESSION["id"];
+
 ?>
 <html style="background: #21323b">
 <head>
@@ -535,7 +554,7 @@ function checkData() {
     })
   }
   if ((turn_id_current != local_UID || set_winner_UID != -1) && player_UID_2_usrn != "ƒ") {
-    if ((P5red_used_Array.length - P5blue_used_Array.length) > 1 || (P5blue_used_Array.length - P5red_used_Array.length) > 1) {
+    if (((P5red_used_Array.length - P5blue_used_Array.length) > 1 || (P5blue_used_Array.length - P5red_used_Array.length) > 1)) {
       fetch(window.location.href + '?ColourDeSync_reset') 
       .then(check_response => check_response.json())
       .then(data => {
@@ -564,7 +583,7 @@ function checkData() {
         fetchData("Small");
       }
     })
-  } 
+  }
 }
 }
 
@@ -633,15 +652,16 @@ function checkData() {
         win_timeframe = data.closedWinner_UID[3];
         if (data.currentColour == "red") { P5red_used_Array.push(data.closedWinner_UID[4]); }
         if (data.currentColour == "blue") { P5blue_used_Array.push(data.closedWinner_UID[4]); }
+        for(let win_counter = 0; win_counter<set_winning_array.length; win_counter++) {
+          grid[set_winning_array[win_counter]].type = data.currentColour;
+        }
         }
         else { set_winning_array = ["win_array_error"]; }
         win_splash_random = parseInt(data.closedWinner_UID[2]);
         if ( Set_GameMode != 2 ) {
     for (let sides_counter_Sm = 0; sides_counter_Sm<sides_display_Sm_Array.length; sides_counter_Sm++) {
-    // if (!sides_display_Array.includes(sides_display_Sm_Array[sides_counter_Sm])) {
     grid[sides_display_Sm_Array[sides_counter_Sm]].type = "side";
     sides_display_Array.push(sides_display_Sm_Array[sides_counter_Sm]);
-    // }
   }
   }
     for(let k2_Sm = 0; k2_Sm<open_choices_Sm_Array.length; k2_Sm++) {
@@ -667,7 +687,7 @@ let grid_shift;
 let move_shift = 0;
 let en0_redirect_display = "<?php echo $ip;?>";
 let colourBlind_mode = "<?php echo $colourPreset_p5relay; ?>";
-let SESSION_ServerLink = <?php echo $_SESSION["CurrentGID_Code"];?>;
+let SESSION_ServerLink = <?php echo intval($_SESSION["CurrentGID_Code"]);?>;
 let check_lineX = [];
 let check_lineY = []; 
 let check_linePD = []; 
@@ -836,7 +856,7 @@ function mouseClicked() {
 function checklocation(base) {
   if (((player_UID_1 == turn_id_current && turn_id_current == local_UID) || (player_UID_2 == turn_id_current && turn_id_current == local_UID)) && player_UID_2 > 0 && set_winner_UID == -1) {
     check_lineX = []; check_lineY = []; check_linePD = []; check_lineND = [];
-    for (let check_PositionX_negative = 1; check_PositionX_negative<5;) { if(base-1 >= 0 && base-check_PositionX_negative%15 != 14 && grid[base].type == grid[base-check_PositionX_negative].type) {check_lineX.push(base-check_PositionX_negative);check_PositionX_negative++;} else{check_PositionX_negative=16} } 
+    for (let check_PositionX_negative = 1; check_PositionX_negative<5;) { if(base-1 >= 0 && base-check_PositionX_negative%15 != 14 && grid[base].type == grid[base-check_PositionX_negative].type) { check_lineX.push(base-check_PositionX_negative);check_PositionX_negative++; } else{check_PositionX_negative=16} } 
     for (let check_PositionX_positive = 1; check_PositionX_positive<5;) { if(base+1 <= 224 && base+check_PositionX_positive%15 != 0 && grid[base].type == grid[base+check_PositionX_positive].type) {check_lineX.push(base+check_PositionX_positive);check_PositionX_positive++;} else{check_PositionX_positive=16} }
     if (check_lineX.length>=4) {location.href = "play.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_lineX[0]+"&&Check2="+check_lineX[1]+"&&Check3="+check_lineX[2]+"&&Check4="+check_lineX[3]+"&&TurnColour="+turn_colour_ghost; }
     for (let check_PositionY_negative = 1; check_PositionY_negative<5;) { if(base-15 >= 0 && grid[base].type == grid[base-(15*check_PositionY_negative)].type) {check_lineY.push(base-(15*check_PositionY_negative));check_PositionY_negative++;} else{check_PositionY_negative=16} }
@@ -892,6 +912,7 @@ function draw() {
       push()
       textAlign(LEFT)
       fill("#394a55")
+      // fill("hotpink")
       textSize(14)
       text("L#"+local_UID+":P#"+player_UID_1+"?"+player_UID_2+":G#"+Game_ID_code+":T#"+turn_id_current+":WU#"+set_winner_UID+":§"+(((player_UID_1 == turn_id_current && turn_id_current == local_UID) || (player_UID_2 == turn_id_current && turn_id_current == local_UID)) && player_UID_2 > 0 && set_winner_UID == -1)+":<"+client_totalMoves+">", width/85, height/50)
       pop()
@@ -998,6 +1019,7 @@ pop()
     if (Set_GameMode == 3 ) {Set_GameMode_display = "GreyWave";} 
     if (Set_GameMode == 4 ) {Set_GameMode_display = "MagicRandom";} 
     if (Set_GameMode == 5 ) {Set_GameMode_display = "SandBox";} 
+    if (Set_GameMode == 6 ) {Set_GameMode_display = "RandomTurn";} 
     MidSet_Button.attribute("value", "Current Mode: " + Set_GameMode_display);
     MidSet_Button.removeAttribute("hidden");
     MidSet_Button.id("midSet_match_button");
@@ -1151,7 +1173,7 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
     echo "<h2>Win Rate: "; if ($User_LobbyScore->save2 > 0) {echo round((intval($User_LobbyScore->save3)/intval($User_LobbyScore->save2))*100, 1)."%"; } else {echo "No Data";} echo "</h2>";
     echo "<h2>Win Streak: ".$User_LobbyScore->save4."</h2>";
     echo "<h4>Max Streak: "; if (intval($User_LobbyScore->save5) > 0) { echo $User_LobbyScore->save5; } else { echo "No Data"; } if (!isset($User_LobbyScore->save5)) { echo "Error:OOD-stat";} echo "</h4>";
-    echo "<h3 id=\"stat_closeButton\" onclick=\"return returnToLobbyNormal()\">close Stats</h3>"; 
+    echo "<h3 id=\"stat_closeButton\" onclick=\"return returnToLobbyNormal()\">Close Stats</h3>"; 
   }
   else {
   $leaderboard_Aplicants = R::findAll("user");

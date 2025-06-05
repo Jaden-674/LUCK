@@ -493,7 +493,7 @@ width: 0px;
   height: 10vh;
   margin-bottom: -10vh;
 background-color: var(--lobby_basic);
-border-radius: 50px;
+border-radius: 100vw;
 border: 0.15vw solid black;
 transition: transform 1s;
 }
