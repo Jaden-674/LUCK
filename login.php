@@ -25,7 +25,7 @@ session_start();
         <br>
         <?php
         if (isset($_GET["id"]) && ($_GET["id"] == "error1" || $_GET["id"] == "error4")){
-            echo "<img src=\"account_login.svg\" class=\"icon_svg\"> <input class=\"login-error-username\" name=\"username\" placeholder=\"Enter Username\" autocomplete=\"off\" onkeypress=\"return event.charCode != 32\" id=\"username\" maxlength=\"18\" required > <br>";
+            echo "<img src=\"images&fonts/account_login.svg\" class=\"icon_svg\"> <input class=\"login-error-username\" name=\"username\" placeholder=\"Enter Username\" autocomplete=\"off\" onkeypress=\"return event.charCode != 32\" id=\"username\" maxlength=\"18\" required > <br>";
         if($_GET["id"] == "error1"){
             echo "<h2 class=\"login-error-noUser-h2\">Username Cannot Be Found</h2>";
             }
@@ -34,14 +34,14 @@ session_start();
             }
         }
         else {
-            echo "<img src=\"account_login.svg\" class=\"icon_svg\"> <input class=\"svg_button_mover\" name=\"username\" placeholder=\"Enter Username\" autocomplete=\"off\" onkeypress=\"return event.charCode != 32\" id=\"username\" maxlength=\"18\" required > <br>";
+            echo "<img src=\"images&fonts/xaccount_login.svg\" class=\"icon_svg\"> <input class=\"svg_button_mover\" name=\"username\" placeholder=\"Enter Username\" autocomplete=\"off\" onkeypress=\"return event.charCode != 32\" id=\"username\" maxlength=\"18\" required > <br>";
         }
 
         if($_GET["id"] == "error2"){
-            echo "<img src=\"lock2-4.svg\" class=\"icon_svg_password\"> <input class=\"login-error-incorrectPassword\" name=\"password\"  placeholder=\"Enter Password\" type=\"password\" autocomplete=\"off\" onkeypress=\"return event.charCode != 32\" id=\"password\" required ><br> ";
+            echo "<img src=\"images&fonts/lock2-4.svg\" class=\"icon_svg_password\"> <input class=\"login-error-incorrectPassword\" name=\"password\"  placeholder=\"Enter Password\" type=\"password\" autocomplete=\"off\" onkeypress=\"return event.charCode != 32\" id=\"password\" required ><br> ";
             echo "<h2 class=\"login-error-incorrectPassword-h2\">Incorrect Password</h2>";
             }
-            else { echo "<img src=\"lock2-4.svg\" class=\"icon_svg_password\"> <input class=\"svg_button_mover\" name=\"password\" placeholder=\"Enter Password\" type=\"password\" autocomplete=\"off\" id=\"password\" required ><br>";}
+            else { echo "<img src=\"images&fonts/lock2-4.svg\" class=\"icon_svg_password\"> <input class=\"svg_button_mover\" name=\"password\" placeholder=\"Enter Password\" type=\"password\" autocomplete=\"off\" id=\"password\" required ><br>";}
         ?>
         <br>
         <br>

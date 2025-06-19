@@ -143,8 +143,25 @@ foreach($user_found as $row) {
     }
 }
 
+echo "<input type=\"button\" id=\"CycleCleanDatabase\" onClick=\"return cleanDatabase()\">";
+if (isset($_GET["task"]) && $_GET["task"] == "CleanDatabase" ) {
+    $valid_accounts_Array = [];
+    for ($x = 0; $x < 100; $x++) {
+        $allUsers_cleaning_save = R::findAll("save".$x);
+        $allUsers_cleaning_users = R::load("user", $x);
+        // if (isset($allUsers_cleaning_save) && !isset($allUsers_cleaning_users)) {
+            // R::trash($allUsers_cleaning_save);
+            echo $x;
+        // }
+    }
+}
 ?>
 
+<script>
+    function cleanDatabase() {
+        window.location.assign("/LUCK/users.php?task=CleanDatabase");
+    }
+</script>
 
 </body>
 </html>

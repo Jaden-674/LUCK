@@ -450,7 +450,7 @@ if(isset($_GET["id"]) && $_GET["id"] == "SaveNewUser") {
     R::store($save_personal);
     $_SESSION["CurrentGID_Code"] = 0;
   }
-    header("location: login.php");  
+    header("location: play.php");  
   }
 // login
 if((isset($_GET["id"]) && $_GET["id"] == "loginCheck" )|| !isset($_SESSION["username"])){
@@ -476,7 +476,7 @@ else{
 
 $added_users_all = R::load('save'.$_SESSION["id"], 1);
 $colourPreset_p5relay = $added_users_all->save1;
-// echo $_SESSION["id"];
+if (!isset($_SESSION["CurrentGID_Code"]) && isset($_SESSION["username"]) ) { $_SESSION["CurrentGID_Code"] = 0; }
 
 ?>
 <html style="background: #21323b">
@@ -687,7 +687,7 @@ let grid_shift;
 let move_shift = 0;
 let en0_redirect_display = "<?php echo $ip;?>";
 let colourBlind_mode = "<?php echo $colourPreset_p5relay; ?>";
-let SESSION_ServerLink = <?php echo intval($_SESSION["CurrentGID_Code"]);?>;
+let SESSION_ServerLink = <?php echo $_SESSION["CurrentGID_Code"];?>;
 let check_lineX = [];
 let check_lineY = []; 
 let check_linePD = []; 
@@ -790,7 +790,7 @@ noStroke()
 
 function preload() {
   font = loadFont("RobotoMono-LightItalic.ttf");
-  imagetest = loadImage("hot-icon.svg");
+  imagetest = loadImage("images&fonts/hot-icon.svg");
 }
 
 function setup() {
@@ -829,7 +829,7 @@ function setup() {
   MidSet_Button.attribute("type", "button");
 
 
-  Exit_Button = createImg("exit-16.svg", "Exit");
+  Exit_Button = createImg("images&fonts/exit-16.svg", "Exit");
   Exit_Button.attribute("hidden", "true");
   Exit_Button.attribute("id", "exit_match_button");
   Exit_Button.attribute("onclick", "return CloseMatch_Request()");
@@ -842,7 +842,7 @@ function touchStarted() {
 }
 function mouseClicked() {
   if (((player_UID_1 == turn_id_current && turn_id_current == local_UID) || (player_UID_2 == turn_id_current && turn_id_current == local_UID)) && player_UID_2 > 0 && set_winner_UID == -1) {
-  for (let i = 0; i < 224; i++) {
+  for (let i = 0; i <= 224; i++) {
         if (mouseX > grid[i].x+grid_shift && mouseX < grid[i].x+grid_shift+grid[i].size &&
         mouseY > grid[i].y + windowHeight/17 && mouseY < grid[i].y+windowHeight/17+grid[i].size && grid[i].type == "open") {
       grid[i].type = colourRelay;
@@ -1089,7 +1089,7 @@ foreach($user_found as $row) {
     if ($row->banned != "true") { 
       echo "<div class=\"sidebar_namePlate\">";
       echo "<a id=\"right_Sidebar_align\">".$row->username."</a>";
-      if (in_array($row->id, $verifiedCheck_array)) {echo "<img src=\"verified-8.svg\">";}
+      if (in_array($row->id, $verifiedCheck_array)) {echo "<img src=\"images&fonts/verified-8.svg\">";}
       echo "<br>";
       echo "</div>";
     }
@@ -1242,15 +1242,15 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
     else { echo "<span style=\"color:red\">"; } 
     echo $total_Players."/2</span></h2>";
     echo "<img id=\"joinMatch_miniButton\"";
-    if (isset($row->uId_2)) { echo "src=\"view-show.svg\" onclick=\"return viewCode_Button_".$row->id."()\" "; }
-    else { echo "src=\"join.svg\" onclick=\"return joinCode_Button_".$row->id."()\""; }
+    if (isset($row->uId_2)) { echo "src=\"images&fonts/view-show.svg\" onclick=\"return viewCode_Button_".$row->id."()\" "; }
+    else { echo "src=\"images&fonts/join.svg\" onclick=\"return joinCode_Button_".$row->id."()\""; }
     echo ">";
   }
   echo "</div>";
   echo "</div>";
 
   echo "<div id=\"reload_button_wrap\">";
-  echo "<img id=\"reload_page_button\" src=\"refresh-sync-reload-1.svg\" onclick=\"return returnToLobbyNormal()\">";
+  echo "<img id=\"reload_page_button\" src=\"images&fonts/refresh-sync-reload-1.svg\" onclick=\"return returnToLobbyNormal()\">";
   echo "</div>";
 
   }
