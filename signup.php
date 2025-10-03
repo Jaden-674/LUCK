@@ -26,7 +26,7 @@
      else{
 
         if (isset($_GET["id"])){
-        echo "<img src=\"account_login.svg\" class=\"icon_svg\"> <input class=\"login-error-username\" name=\"username\" placeholder=\"Create Username\" autocomplete=\"off\"   onkeypress=\"return event.charCode != 32\" id=\"username\" maxlength=\"18\" required > <br>";
+        echo "<img src=\"images&fonts/account_login.svg\" class=\"icon_svg\"> <input class=\"login-error-username\" name=\"username\" placeholder=\"Create Username\" autocomplete=\"off\"   onkeypress=\"return event.charCode != 32\" id=\"username\" maxlength=\"18\" required > <br>";
          if($_GET["id"] == "error6"){
             echo "<h2 class=\"login-error-incorrectPassword-h2\">Username Already Taken</h2>";
         }   
@@ -35,9 +35,9 @@
         }   
             }
         else {
-            echo "<img src=\"account_login.svg\" class=\"icon_svg\"> <input class=\"svg_button_mover\" name=\"username\" placeholder=\"Create Username\" autocomplete=\"off\"   onkeypress=\"return event.charCode != 32\" id=\"username\" maxlength=\"18\" required > <br>";
+            echo "<img src=\"images&fonts/account_login.svg\" class=\"icon_svg\"> <input class=\"svg_button_mover\" name=\"username\" placeholder=\"Create Username\" autocomplete=\"off\"   onkeypress=\"return event.charCode != 32\" id=\"username\" maxlength=\"18\" required > <br>";
         }
-        echo "<img src=\"lock2-4.svg\" class=\"icon_svg_password\"> <input class=\"svg_button_mover\" name=\"password\" placeholder=\"Create Password\" type=\"password\" id=\"password\" required ><br>";
+        echo "<img src=\"images&fonts/lock2-4.svg\" class=\"icon_svg_password\"> <input class=\"svg_button_mover\" name=\"password\" placeholder=\"Create Password\" type=\"password\" id=\"password\" required ><br>";
 
 
        

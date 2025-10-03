@@ -55,6 +55,14 @@ if (R::findOne('save', 'id = ?', [ $_SESSION["CurrentGID_Code"] ]) == null && $_
 } 
 
 //Json package 
+  $SetupVaribles = ["ServerLinkCode" => [], "localUID" => []];
+  $SetupVaribles["ServerLinkCode"] = $_SESSION["CurrentGID_Code"];
+  $SetupVaribles["localUID"] = intval($_SESSION["id"]);
+  if (isset($_GET["intitalRequestSetup"])) {
+    echo json_encode($SetupVaribles);
+    exit;
+  }
+
 if($_SESSION["CurrentGID_Code"] != 0) {
   $item = R::load("save", $viewingCode);
   //Large
@@ -450,7 +458,7 @@ if(isset($_GET["id"]) && $_GET["id"] == "SaveNewUser") {
     R::store($save_personal);
     $_SESSION["CurrentGID_Code"] = 0;
   }
-    header("location: play.php");  
+    header("location: login.php");  
   }
 // login
 if((isset($_GET["id"]) && $_GET["id"] == "loginCheck" )|| !isset($_SESSION["username"])){
@@ -473,11 +481,6 @@ else{
     }
 }
 }
-
-$added_users_all = R::load('save'.$_SESSION["id"], 1);
-$colourPreset_p5relay = $added_users_all->save1;
-if (!isset($_SESSION["CurrentGID_Code"]) && isset($_SESSION["username"]) ) { $_SESSION["CurrentGID_Code"] = 0; }
-
 ?>
 <html style="background: #21323b">
 <head>
@@ -500,24 +503,7 @@ if (!isset($_SESSION["CurrentGID_Code"]) && isset($_SESSION["username"]) ) { $_S
     </style>
 </head>
 <body>
-
 <script>
-  // remove zoom in
-  window.addEventListener('wheel', function (e) {
-    if (e.ctrlKey || e.metaKey) {
-      e.preventDefault();
-    }
-  }, { passive: false });
-
-  window.addEventListener('keydown', function (e) {
-    const zoomKeys = ['+', '=', '-', '0'];
-    if ((e.ctrlKey || e.metaKey) && zoomKeys.includes(e.key)) {
-      e.preventDefault();
-    }
-  });
-
-
-// default changing varibles
 let player_UID_1 = -1;
 let player_UID_2 = -1;
 let turn_id_current = -1;
@@ -535,8 +521,173 @@ let open_choices_Sm_Array = [];
 let win_timeframe = 0;
 let Set_GameMode = 1;
 let client_totalMoves = -1;
-let local_UID = <?php echo intval($_SESSION["id"]);?>;
 let First_LargePacket_set = "false";
+let local_UID = -1
+let grid = [];
+let tileSize;
+let gridSize = 15
+let all_sides = []
+let grid_shift;
+let move_shift = 0;
+let SESSION_ServerLink;
+let colourBlind_mode = "off" 
+let check_lineX = [];
+let check_lineY = []; 
+let check_linePD = []; 
+let check_lineND = [];
+let localbutton_active = false;
+let RightSet_Button;
+let Set_GameMode_display;
+let winning_username = -1;
+let Exit_Button_1pass = "false";
+let turn_id_current_ursn = "ƒ";
+
+function intitalRequestSetup() {
+  return new Promise(resolve => {
+    fetch(window.location.href + '?intitalRequestSetup')
+    .then(SetupVaribles => SetupVaribles.json())
+    .then(data => {
+      SESSION_ServerLink = parseInt(data.ServerLinkCode);
+      local_UID = data.localUID;
+      Game_ID_code = data.ServerLinkCode;
+      resolve()
+    })
+  });
+}
+
+class Square {
+  constructor(x, y, size, type, id) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.type = type;
+    this.id = id;
+    grid_shift = width/2-7.5*windowHeight/17;
+  }
+  draw() {
+    if (frameCount == 2 && Set_GameMode == 4) {
+    this.x = round(random(1,45)) * gridSize;
+    this.y = round(random(1,45)) * gridSize;
+    }
+    if(this.type == "disabled")
+    fill("#21323b");
+    if(this.type == "side") {
+    fill("#6f8087")
+    }
+    if (this.type == "open") 
+    fill(220)
+   if(this.type == "red" && colourBlind_mode == "off") {
+    fill(250, 100, 100)
+    if (set_winner_UID == -1 && Set_GameMode == 2) 
+    fill("#21323b");
+   }
+  if (this.type == "red" && colourBlind_mode == "protanopia") {
+    fill("#ffd940")
+    if (set_winner_UID == -1 && Set_GameMode == 2) 
+    fill("#21323b");
+  }
+  if(this.type == "blue") {
+    fill(100, 100, 250)
+    if (set_winner_UID == -1 && Set_GameMode == 2 ) 
+    fill("#21323b");
+  }
+  push()
+    if (set_winner_UID == -1) {stroke("#21323b");}
+    else{stroke("#525D64");}
+    rect(this.x+grid_shift, this.y + windowHeight / 17, this.size, this.size);
+    if (mouseX > this.x+grid_shift && mouseX < this.x+grid_shift+this.size &&
+        mouseY > this.y + windowHeight/17 && mouseY < this.y+windowHeight/17+this.size && this.type == "open") {
+          push()
+          if (((player_UID_1 == turn_id_current && turn_id_current == local_UID) || (player_UID_2 == turn_id_current && turn_id_current == local_UID)) && player_UID_2 > 0 && set_winner_UID == -1) {
+            if (colourRelay == "red" && colourBlind_mode == "off"){fill(255, 0, 0 , 30)}
+            if (colourRelay == "red" && colourBlind_mode == "protanopia"){fill("#ffefb0")}
+            if (colourRelay == "blue") {fill(0, 0, 255, 30)}
+          }
+          else if (player_UID_2 > 0 && set_winner_UID == -1){fill(0, 0, 0, 20)}
+          rect(this.x + grid_shift, this.y + windowHeight / 17, this.size, this.size);
+          pop()
+        }
+  pop()
+  push()
+  noStroke()
+    textFont(font);
+    textSize(1.2*windowWidth/100);
+    fill("#21323b");
+    if (set_winning_array.includes(this.id)) {
+      fill(220, 220, 0)
+    }
+    if (set_winning_array.includes(this.id) && colourRelay == "red" && colourBlind_mode == "protanopia") {
+      fill("black")
+    }
+    textAlign(CENTER, CENTER)
+    text(this.id, this.x + grid_shift + this.size/2, this.y + windowHeight / 17+ 3*this.size/7);
+    pop()
+
+  if (set_winner_UID != -1 && !set_winning_array.includes(this.id)) {
+    push()
+    stroke("#5B656A");
+    fill(180, 180, 180, 150)
+    rect(this.x + grid_shift, this.y + windowHeight / 17, this.size, this.size);
+    pop()
+  }
+  }
+}
+
+function preload() {
+  font = loadFont("RobotoMono-LightItalic.ttf");
+}
+
+async function setup() {
+  const result = await intitalRequestSetup(); 
+  createCanvas(windowWidth, windowHeight);
+  tileSize = windowHeight / 17;  
+  let idCounter = 0;
+  for (let row = 0; row < gridSize; row++) {
+    for (let col = 0; col < gridSize; col++) {
+      let x = col * tileSize;
+      let y = row * tileSize;
+      grid.push(new Square(x, y, tileSize, "disabled", idCounter));
+      idCounter++;
+    }
+  }
+  if(SESSION_ServerLink != 0) {
+      fetchData("Large");
+      setInterval(checkData, 500);
+      First_LargePacket_set = "true";
+  }
+  frameRate(60);
+
+  // overlay buttons
+  overlay = createDiv();
+  overlay.id("PreMatch_overlay");
+  RightSet_Button = createInput();
+  RightSet_Button.attribute("hidden", "true");
+  RightSet_Button.attribute("type", "button");
+  LeftSet_Button = createInput();
+  LeftSet_Button.attribute("hidden", "true");
+  LeftSet_Button.attribute("type", "button");
+  MidSet_Button = createInput();
+  MidSet_Button.attribute("hidden", "true");
+  MidSet_Button.attribute("type", "button");
+
+  Exit_Button = createImg("images&fonts/exit-16.svg", "Exit");
+  Exit_Button.attribute("hidden", "true");
+  Exit_Button.attribute("id", "exit_match_button");
+  Exit_Button.attribute("onclick", "return CloseMatch_Request()");
+}
+  // remove zoom in
+  window.addEventListener('wheel', function (e) {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  window.addEventListener('keydown', function (e) {
+    const zoomKeys = ['+', '=', '-', '0'];
+    if ((e.ctrlKey || e.metaKey) && zoomKeys.includes(e.key)) {
+      e.preventDefault();
+    }
+  });
 
 function checkData() {
   if (player_UID_2_usrn == "ƒ") {
@@ -558,8 +709,8 @@ function checkData() {
       fetch(window.location.href + '?ColourDeSync_reset') 
       .then(check_response => check_response.json())
       .then(data => {
-        if (data == null && set_winner_UID == -1) { window.location.assign("/LUCK/play.php?error=12.1");}
-        else if (data == null && local_UID != player_UID_1 && local_UID != player_UID_2 ) { window.location.assign("/LUCK/play.php?error=13"); }
+        if (data == null && set_winner_UID == -1) { window.location.assign("./play.php?error=12.1");}
+        else if (data == null && local_UID != player_UID_1 && local_UID != player_UID_2 ) { window.location.assign("./play.php?error=13"); }
         P5red_used_Array = data.RedSync;
         P5blue_used_Array = data.BlueSync;
           for(let k_red2 = 0; k_red2<P5red_used_Array.length; k_red2++) {
@@ -574,8 +725,8 @@ function checkData() {
     fetch(window.location.href + '?check_data')
     .then(check_response => check_response.json())
     .then(data => {
-      if (data == null && set_winner_UID == -1) { window.location.assign("/LUCK/play.php?error=12.1");}
-      else if (data == null && local_UID != player_UID_1 && local_UID != player_UID_2 ) { window.location.assign("/LUCK/play.php?error=13"); }
+      if (data == null && set_winner_UID == -1) { window.location.assign("./play.php?error=12.1");}
+      else if (data == null && local_UID != player_UID_1 && local_UID != player_UID_2 ) { window.location.assign("./play.php?error=13"); }
       if (data.T_M == 0 && player_UID_2_usrn == "ƒ") {
         fetchData("Large");
       }
@@ -603,7 +754,7 @@ function checkData() {
         turn_id_current = parseInt(data.turn_id);
         if (data.turn_id == null) turn_id_current_ursn = "ƒ";
         else { turn_id_current_ursn = data.turn_id[1]; }
-        if (data.playerA == null) {window.location.assign("/LUCK/play.php?error=11");}
+        if (data.playerA == null) {window.location.assign("./play.php?error=11");}
         player_UID_1_usrn = data.playerA[1];
         if (data.playerB != null) { player_UID_2_usrn = data.playerB[1]; }
         if (player_UID_1_usrn == null) player_UID_1_usrn = "ƒ";
@@ -637,7 +788,7 @@ function checkData() {
   }
       }
       if (queryType == "Small") {
-        if(data == null) { window.location.assign("/LUCK/play.php?error=11"); }
+        if(data == null) { window.location.assign("./play.php?error=11"); }
         client_totalMoves = parseInt(data.total_movesSync)+1;
         colourRelay = data.currentColour;
         open_choices_Sm_Array = data.d1;
@@ -678,164 +829,6 @@ function checkData() {
       }   
     })
 }
-// lets for values
-let grid = [];
-let tileSize;
-let gridSize = 15
-let all_sides = []
-let grid_shift;
-let move_shift = 0;
-let en0_redirect_display = "<?php echo $ip;?>";
-let colourBlind_mode = "<?php echo $colourPreset_p5relay; ?>";
-let SESSION_ServerLink = <?php echo $_SESSION["CurrentGID_Code"];?>;
-let check_lineX = [];
-let check_lineY = []; 
-let check_linePD = []; 
-let check_lineND = [];
-let localbutton_active = false;
-let RightSet_Button;
-let overlay;
-let Set_GameMode_display;
-let winning_username = -1;
-let Exit_Button_1pass = "false";
-
-class Square {
-  constructor(x, y, size, type, id) {
-    this.x = x;
-    this.y = y;
-    this.size = size;
-    this.type = type;
-    this.id = id;
-    grid_shift = width/2-7.5*windowHeight/17;
-  }
-
-  draw() {
-    if (frameCount == 2 && Set_GameMode == 4) {
-    this.x = round(random(1,45)) * gridSize;
-    this.y = round(random(1,45)) * gridSize;
-    }
-    if(this.type == "disabled")
-    fill("#21323b");
-    if(this.type == "side") {
-    fill("#6f8087")
-    }
-    if (this.type == "open") 
-    fill(220)
-   if(this.type == "red" && colourBlind_mode == "off") {
-    fill(250, 100, 100)
-    if (set_winner_UID == -1 && Set_GameMode == 2) 
-    fill("#21323b");
-  }
-  if (this.type == "red" && colourBlind_mode == "protanopia") {
-    fill("#ffd940")
-    if (set_winner_UID == -1 && Set_GameMode == 2) 
-    fill("#21323b");
-  }
- if(this.type == "blue") {
-    fill(100, 100, 250)
-    if (set_winner_UID == -1 && Set_GameMode == 2 ) 
-    fill("#21323b");
-  }
-  push()
-    if (set_winner_UID == -1) {stroke("#21323b");}
-    else{stroke("#525D64");}
-    rect(this.x+grid_shift, this.y + windowHeight / 17, this.size, this.size);
-    if (mouseX > this.x+grid_shift && mouseX < this.x+grid_shift+this.size &&
-        mouseY > this.y + windowHeight/17 && mouseY < this.y+windowHeight/17+this.size && this.type == "open") {
-          push()
-          if (((player_UID_1 == turn_id_current && turn_id_current == local_UID) || (player_UID_2 == turn_id_current && turn_id_current == local_UID)) && player_UID_2 > 0 && set_winner_UID == -1) {
-            if (colourRelay == "red" && colourBlind_mode == "off"){fill(255, 0, 0 , 30)}
-            if (colourRelay == "red" && colourBlind_mode == "protanopia"){fill("#ffefb0")}
-            if (colourRelay == "blue") {fill(0, 0, 255, 30)}
-          }
-          else if (player_UID_2 > 0 && set_winner_UID == -1){fill(0, 0, 0, 20)}
-          rect(this.x + grid_shift, this.y + windowHeight / 17, this.size, this.size);
-          pop()
-        }
-pop()
-//  if (this.type == "red") {
-//  push()
-//  if (colourBlind_mode == "off" ) { tint(225, 225, 225, 80); }
-// else { tint(25, 25, 25, 80) }
-//  // pixelDensity(1)
-//  noSmooth()
-//  image(imagetest, this.x + grid_shift, this.y + windowHeight / 17)
-//  pop()
-//  }
-push()
-noStroke()
-    textFont(font);
-    textSize(1.2*windowWidth/100);
-    fill("#21323b");
-    if (set_winning_array.includes(this.id)) {
-      fill(220, 220, 0)
-    }
-    if (set_winning_array.includes(this.id) && colourRelay == "red" && colourBlind_mode == "protanopia") {
-      fill("black")
-    }
-    textAlign(CENTER, CENTER)
-    text(this.id, this.x + grid_shift + this.size/2, this.y + windowHeight / 17+ 3*this.size/7);
-    pop()
-
-  if (set_winner_UID != -1 && !set_winning_array.includes(this.id)) {
-    push()
-    stroke("#5B656A");
-    fill(180, 180, 180, 150)
-    rect(this.x + grid_shift, this.y + windowHeight / 17, this.size, this.size);
-    pop()
-  }
-  }
-  
-}
-
-function preload() {
-  font = loadFont("RobotoMono-LightItalic.ttf");
-  imagetest = loadImage("images&fonts/hot-icon.svg");
-}
-
-function setup() {
-  createCanvas(windowWidth, windowHeight);
-  tileSize = windowHeight / 17;  
-  let SESSION_ServerLink_setup = <?php echo $_SESSION["CurrentGID_Code"];?>;
-  let idCounter = 0;
-  //create all squares
-  for (let row = 0; row < gridSize; row++) {
-    for (let col = 0; col < gridSize; col++) {
-      let x = col * tileSize;
-      let y = row * tileSize;
-      grid.push(new Square(x, y, tileSize, "disabled", idCounter));
-      idCounter++;
-    }
-  }
-  //call data when needed 
-  if(SESSION_ServerLink_setup != 0) {
-      fetchData("Large");
-      setInterval(checkData, 500);
-      First_LargePacket_set = "true";
-  }
-  frameRate(60);
-
-  // overlay buttons
-  overlay = createDiv();
-  overlay.id("PreMatch_overlay");
-  RightSet_Button = createInput();
-  RightSet_Button.attribute("hidden", "true");
-  RightSet_Button.attribute("type", "button");
-  LeftSet_Button = createInput();
-  LeftSet_Button.attribute("hidden", "true");
-  LeftSet_Button.attribute("type", "button");
-  MidSet_Button = createInput();
-  MidSet_Button.attribute("hidden", "true");
-  MidSet_Button.attribute("type", "button");
-
-
-  Exit_Button = createImg("images&fonts/exit-16.svg", "Exit");
-  Exit_Button.attribute("hidden", "true");
-  Exit_Button.attribute("id", "exit_match_button");
-  Exit_Button.attribute("onclick", "return CloseMatch_Request()");
-  
-  imagetest.resize(windowHeight / 17, windowHeight / 17)
-}
 
 function touchStarted() {
   mouseClicked()
@@ -870,7 +863,7 @@ function checklocation(base) {
     if (check_linePD.length>=4) {location.href = "play.php?GridUpdate=win&&ClickBase="+base+"&&Check1="+check_linePD[0]+"&&Check2="+check_linePD[1]+"&&Check3="+check_linePD[2]+"&&Check4="+check_linePD[3]+"&&TurnColour="+turn_colour_ghost; }
     if (check_lineX.length<4 && check_lineY.length<4 && check_lineND.length<4 && check_linePD.length<4) { 
       fetch(window.location.href+"?Locked="+base+"&&GridUpdate="+turn_colour_ghost).then(clicked_response => clicked_response.json()).then(data => { 
-      if( data == null ) { window.location.assign("/LUCK/play.php?error=12.1"); }
+      if( data == null ) { window.location.assign("./play.php?error=12.1"); }
       colourRelay = data.currentColour; 
       if (colourRelay == "blue") { P5red_used_Array.push(base); }
       else { P5blue_used_Array.push(base); }
@@ -902,7 +895,6 @@ function draw() {
     rect(0, 0, width, height)
     pop()
   }
-
   if (Game_ID_code > 0) {
   for (let square of grid) {
     square.draw();
@@ -961,7 +953,7 @@ function draw() {
   }
     pop()
   }
-  if (Set_GameMode != 5) { text("Side Count:"+sides_display_Array.length+" ("+parseFloat((2/sides_display_Array.length*100).toFixed(2))+"%)", 0, 52.5*windowHeight/100); } else { text("Side Count: 0? (maybe%)" , 0, 45*windowHeight/100);}
+  // if (Set_GameMode != 5) { text("Side Count:"+sides_display_Array.length+" ("+parseFloat((2/sides_display_Array.length*100).toFixed(2))+"%)", 0, 52.5*windowHeight/100); } else { text("Side Count: 0? (maybe%)" , 0, 45*windowHeight/100);}
 if (P5red_used_Array[P5red_used_Array.length-1] && Set_GameMode != 2) {
 if (colourBlind_mode == "off")
 text("Last Red:"+P5red_used_Array[P5red_used_Array.length-1], 0, 42.5*windowHeight/100)
@@ -1067,6 +1059,8 @@ pop()
   Exit_Button_1pass = "true";
   }
 }
+
+
 </script>
 <?php
 $user_found = R::findAll('user');
@@ -1081,7 +1075,7 @@ echo "<div class=\"sidebar_fixed\">LUCK Beta 5.4.[29/4]<br><br>";
 
 echo "<script>";
 echo "function myFunction() {";
-echo "navigator.clipboard.writeText('http://".strval($ip)."/LUCK/play.php?ServerLink=".strval($_SESSION['CurrentGID_Code'])."')";
+echo "navigator.clipboard.writeText('http://".strval($ip)."./play.php?ServerLink=".strval($_SESSION['CurrentGID_Code'])."')";
 echo "}";
 echo "</script>";
 
@@ -1125,40 +1119,40 @@ foreach($user_found as $row) {
   </div>
   <script>
     function joinCode_entered() { 
-      window.location.assign("/LUCK/play.php?reset=true&&ServerLink="+document.getElementById("join_code_input").value); 
+      window.location.assign("./play.php?reset=true&&ServerLink="+document.getElementById("join_code_input").value); 
     }
     function newMatch_Requested() { 
-      window.location.assign("/LUCK/play.php?newServerLink=clean"); 
+      window.location.assign("./play.php?newServerLink=clean"); 
     }
-    function ChangeToLocalMatch() { 
-      window.location.assign("/LUCK/play.php?reset=true"); 
+    function ChangeToLocalMatch() {
+      window.location.assign("./play.php?reset=true"); 
     }
     function CloseMatch_Request() { 
-      window.location.assign("/LUCK/play.php?match_destroy=true"); 
+      window.location.assign("./play.php?match_destroy=true"); 
     }
     function ReturnHome_SPEC_Request() { 
-      window.location.assign("/LUCK/play.php?ServerLink=0"); 
+      window.location.assign("./play.php?ServerLink=0"); 
     }
     function GameModeSwitchRequest() {
-      window.location.assign("/LUCK/play.php?SwitchGameMode=true")
+      window.location.assign("./play.php?SwitchGameMode=true")
     }
     function rotate_Leaderboard() {
-      window.location.assign("/LUCK/play.php?rotate_Leaderboard=true")
+      window.location.assign("./play.php?rotate_Leaderboard=true")
     }
     function returnToLobbyNormal() {
-      window.location.assign("/LUCK/play.php")
+      window.location.assign("./play.php")
     }
   </script>
   <?php
   $match_overlay_dataPull = R::load("save", $viewingCode);
 // ip splash
-echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig getifaddr en0"))."</div>";
+// echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig getifaddr en0"))."</div>";
 //lobby code start
   if ($_SESSION["CurrentGID_Code"] == 0) {
   echo "<div id=\"titleSplash_text\"> LUCK </div>";
   echo "<div id=\"lobby_overlay_html\">";
   echo "<input id=\"join_code_input\" type=\"number\" placeholder=\"Enter Game Code\" onkeydown=\"if (event.keyCode == 13) { joinCode_entered(); return false }\" onkeypress=\"return event.charCode >= 48 && event.charCode <= 57\" min=\"0\"> </input>";
-  echo "<input type=\"button\" id=\"CreateMatch_button\" hidden=\"false\" disabled=\"false\" value=\"Create Match\" onclick=\"return newMatch_Requested()\"></input>";
+  echo "<input type=\"button\" id=\"CreateMatch_button\" value=\"Create Match\" onclick=\"return newMatch_Requested()\"></input>";
   echo "<input type=\"button\" id=\"JoinCode_button\" hidden=\"true\" disabled=\"true\" value=\"Join Match\" onclick=\"return joinCode_entered()\"></input>";
 
   //leadeboard
@@ -1189,7 +1183,7 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
     else { array_push($leaderB_statArray, round((intval($User_statpull->save3)/intval($User_statpull->save2))*100, 1)); }
     echo "<script>";
     echo "function viewStat_".$User_statpull->name."() {";
-    echo "window.location.assign(\"/LUCK/play.php?statView=".$User_statpull->name."\")";
+    echo "window.location.assign(\"./play.php?statView=".$User_statpull->name."\")";
     echo "}";
     echo "</script>";
     }
@@ -1230,10 +1224,10 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
   foreach($currentMatches_pull as $row) {
     echo "<script>";
     echo "function joinCode_Button_".$row->id."() {";
-    echo "window.location.assign(\"/LUCK/play.php?reset=true&&ServerLink=".$row->id."\"".")";
+    echo "window.location.assign(\"./play.php?reset=true&&ServerLink=".$row->id."\"".")";
     echo "}";
     echo "function viewCode_Button_".$row->id."() {";
-    echo "window.location.assign(\"/LUCK/play.php?ServerLink=".$row->id."\"".")";
+    echo "window.location.assign(\"./play.php?ServerLink=".$row->id."\"".")";
     echo "}";
     echo "</script>";
     $total_Players = isset($row->uId_2) ? 2 : 1;
@@ -1274,29 +1268,5 @@ echo "<div id=\"en0_splashDisplay\">Connect At: ".trim(shell_exec("ipconfig geti
     echo "<div id=\"errorTab\">Player \"".$_GET["invalid"]."\" Cannot Be Found</div>";
   }
 ?>
-<script> 
-if (SESSION_ServerLink == 0) {
-const input = document.getElementById("join_code_input");
-const buttonEmpty = document.getElementById("CreateMatch_button");
-const buttonFilled = document.getElementById("JoinCode_button");
-window.onload = function() {
-  buttonEmpty.hidden = false;
-  buttonEmpty.disabled = false;
-};
-input.addEventListener("input", () => {
-  if (input.value.trim() !== "") {
-    buttonEmpty.hidden = true;
-    buttonFilled.hidden = false;
-    buttonEmpty.disabled = true;
-    buttonFilled.disabled = false;
-  } else {
-    buttonEmpty.hidden = false;
-    buttonFilled.hidden = true;
-    buttonEmpty.disabled = false;
-    buttonFilled.disabled = true;
-  }
-});
-}
-</script>
 </body>
 </html>

@@ -34,7 +34,7 @@ session_start();
             }
         }
         else {
-            echo "<img src=\"images&fonts/xaccount_login.svg\" class=\"icon_svg\"> <input class=\"svg_button_mover\" name=\"username\" placeholder=\"Enter Username\" autocomplete=\"off\" onkeypress=\"return event.charCode != 32\" id=\"username\" maxlength=\"18\" required > <br>";
+            echo "<img src=\"images&fonts/account_login.svg\" class=\"icon_svg\"> <input class=\"svg_button_mover\" name=\"username\" placeholder=\"Enter Username\" autocomplete=\"off\" onkeypress=\"return event.charCode != 32\" id=\"username\" maxlength=\"18\" required > <br>";
         }
 
         if($_GET["id"] == "error2"){
